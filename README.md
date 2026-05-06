@@ -10,15 +10,6 @@
 
 本工具帮助 Windows 用户快速配置 Claude Code 使用第三方 API 服务，无需手动设置环境变量。通过交互式界面，您可以轻松切换不同的 API 提供商。
 
-### 为什么需要这个工具？
-
-Claude Code 默认使用 Anthropic 官方 API，但官方 API 可能存在以下问题：
-- 需要海外支付方式
-- 价格较高
-- 访问速度较慢
-
-本工具支持配置国内 API 服务（MIMO、DeepSeek），让您更便捷地使用 Claude Code。
-
 ## 功能特性
 
 - **交互式菜单** - 简单直观的选项界面
@@ -35,6 +26,7 @@ Claude Code 默认使用 Anthropic 官方 API，但官方 API 可能存在以下
 
 | 项目 | 值 |
 |------|-----|
+| 官网 | [MIMO API](https://platform.xiaomimimo.com/console/plan-manage) |
 | 端点 | `https://token-plan-cn.xiaomimimo.com/anthropic` |
 | 主模型 | `mimo-v2.5-pro` |
 | 轻量模型 | `mimo-v2.5` |
@@ -44,6 +36,7 @@ Claude Code 默认使用 Anthropic 官方 API，但官方 API 可能存在以下
 
 | 项目 | 值 |
 |------|-----|
+| 官网 | [MIMO API](https://platform.xiaomimimo.com/console/plan-manage) |
 | 端点 | `https://api.xiaomimimo.com/anthropic` |
 | 主模型 | `mimo-v2.5-pro` |
 | 轻量模型 | `mimo-v2.5` |
@@ -147,20 +140,20 @@ claude --version
 
 ## 环境变量说明
 
-脚本会设置以下环境变量：
+配置完成后，脚本将设置以下系统环境变量：
 
 | 环境变量 | 说明 | 示例值 |
 |---------|------|--------|
-| `ANTHROPIC_BASE_URL` | API 端点地址 | `https://api.deepseek.com/anthropic` |
+| `ANTHROPIC_BASE_URL` | API 代理地址 | `https://api.deepseek.com/anthropic` |
 | `ANTHROPIC_AUTH_TOKEN` | API 密钥 | `sk-xxxxxxxx` |
-| `ANTHROPIC_MODEL` | 默认模型 | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_OPUS_MODEL` | Opus 模型 | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_SONNET_MODEL` | Sonnet 模型 | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | Haiku 模型 | `deepseek-v4-flash` |
-| `CLAUDE_CODE_SUBAGENT_MODEL` | 子代理模型 | `deepseek-v4-flash` |
-| `CLAUDE_CODE_EFFORT_LEVEL` | 努力级别 | `max` |
-| `CLAUDE_CONTEXT_CAPACITY_OVERRIDE` | 上下文容量（仅 MIMO） | `1000000` |
-| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | 自动压缩阈值（仅 MIMO） | `100` |
+| `ANTHROPIC_MODEL` | 指定主模型 | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_OPUS_MODEL` | 映射 Opus 模型 | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL` | 映射 Sonnet 模型 | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | 映射 Haiku 模型 | `deepseek-v4-flash` |
+| `CLAUDE_CODE_SUBAGENT_MODEL` | Subagent 辅助模型 | `deepseek-v4-flash` |
+| `CLAUDE_CODE_EFFORT_LEVEL` | 思考程度 | `max` |
+| `CLAUDE_CONTEXT_CAPACITY_OVERRIDE` | 上下文限制  | `1000000` |
+| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | 自动压缩阈值  | `100` |
 
 ## 常见问题
 
@@ -220,7 +213,6 @@ npm install -g @anthropic-ai/claude-code
 claude-code-api-setup/
 ├── setup-claude-api.ps1    # PowerShell 主脚本
 ├── setup-claude-api.bat    # 批处理启动文件
-├── CLAUDE.md               # Claude Code 指导文档
 └── README.md               # 本文件
 ```
 
@@ -247,7 +239,7 @@ cd claude-code-api-setup
 
 ## 更新日志
 
-### v1.0.0 (2026-05-07)
+### v1.0.0 (2025-05-22)
 
 - 初始发布
 - 支持 MIMO API（套餐计费）
@@ -259,7 +251,7 @@ cd claude-code-api-setup
 ## 相关链接
 
 - [Claude Code 官方文档](https://docs.anthropic.com/claude-code)
-- [MIMO API 官网](https://xiaomimimo.com)
+- [MIMO API 官网](https://platform.xiaomimimo.com/console/plan-manage)
 - [DeepSeek API 官网](https://platform.deepseek.com)
 
 ## 许可证

@@ -1,12 +1,12 @@
 ﻿# Claude Code API 配置脚本
 # 用于自动化设置 Claude Code 的 API 环境变量
 
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$OutputEncoding = [System.Text.Encoding]::UTF8
-
 param(
     [switch]$Help
 )
+
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
 
 if ($Help) {
     Write-Host 'Claude Code API 配置脚本'
