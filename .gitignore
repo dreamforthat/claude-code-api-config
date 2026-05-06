@@ -1,0 +1,103 @@
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# API keys and secrets
+.env
+.env.local
+.env.*.local
+secrets.json
+credentials.json
+*.key
+*.pem
+*.secret
+
+# Claude Code
+.claude/
+.claudecode/
+*.claude
+
+# AI Models
+*.gguf
+*.ggml
+*.bin
+*.model
+*.onnx
+*.pt
+*.pth
+*.h5
+*.pb
+*.tflite
+
+# AI Settings
+.anthropic/
+.ai/
+.cache/
+*.cache
+embedding_cache/
+vector_store/
+chroma/
+faiss/
+pinecone/
+
+# Node modules
+node_modules/
+package-lock.json
+yarn.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+.conda/
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Data
+*.csv
+*.jsonl
+*.parquet
+*.feather
+*.hdf5
+
+# Docs
+!README.md
+!CLAUDE.md
+docs/
+notes/
+todo.md
+
+# Config
+config.json
+settings.json
+*.config
