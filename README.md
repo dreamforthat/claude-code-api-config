@@ -66,23 +66,23 @@
 如果您不想克隆仓库，可以直接在 PowerShell 中运行以下命令：
 
 ```powershell
-iex (irm https://raw.githubusercontent.com/yourusername/claude-code-api-setup/main/setup-claude-api.ps1)
+iex (irm https://raw.githubusercontent.com/dreamforthat/claude-code-api-config/main/setup-claude-api.ps1)
 ```
 
-> **注意**: 请将 `yourusername` 替换为您的 GitHub 用户名。此命令会下载并直接执行配置脚本。
+> **注意**: 此命令会下载并直接执行配置脚本，请确保您的网络环境可以访问 GitHub。
 
 ### 方式二：下载发布版本
 
-1. 前往 [Releases](https://github.com/yourusername/claude-code-api-setup/releases) 页面
-2. 下载最新版本的 `claude-code-api-setup.zip`
+1. 前往 [Releases](https://github.com/dreamforthat/claude-code-api-config/releases) 页面
+2. 下载最新版本的 `claude-code-api-config.zip`
 3. 解压到任意目录
 4. 双击运行 `setup-claude-api.bat`
 
 ### 方式三：克隆仓库
 
 ```bash
-git clone https://github.com/yourusername/claude-code-api-setup.git
-cd claude-code-api-setup
+git clone https://github.com/dreamforthat/claude-code-api-config.git
+cd claude-code-api-config
 ```
 
 ## 使用方法
@@ -97,7 +97,7 @@ cd claude-code-api-setup
 
 ```powershell
 # 进入脚本目录
-cd path\to\claude-code-api-setup
+cd path\to\claude-code-api-config
 
 # 运行脚本
 .\setup-claude-api.ps1
@@ -211,7 +211,7 @@ npm install -g @anthropic-ai/claude-code
 ### 项目结构
 
 ```
-claude-code-api-setup/
+claude-code-api-config/
 ├── setup-claude-api.ps1    # PowerShell 主脚本
 ├── setup-claude-api.bat    # 批处理启动文件
 └── README.md               # 本文件
@@ -221,8 +221,8 @@ claude-code-api-setup/
 
 ```powershell
 # 克隆仓库
-git clone https://github.com/yourusername/claude-code-api-setup.git
-cd claude-code-api-setup
+git clone https://github.com/dreamforthat/claude-code-api-config.git
+cd claude-code-api-config
 
 # 运行测试
 .\setup-claude-api.ps1 -Help

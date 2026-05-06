@@ -27,15 +27,57 @@ if ($Help) {
 function Check-ClaudeCode {
     if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
         Write-Host '=================================' -ForegroundColor Red
-        Write-Host '警告: 未检测到 Claude Code (claude)' -ForegroundColor Yellow
-        Write-Host '请确保已通过以下命令安装:' -ForegroundColor White
-        Write-Host 'npm install -g @anthropic-ai/claude-code' -ForegroundColor Cyan
+        Write-Host '提示: 未检测到 Claude Code (claude)' -ForegroundColor Yellow
         Write-Host '=================================' -ForegroundColor Red
         Write-Host ''
-        $continue = Read-Host '是否仍要继续配置环境变量? (Y/N)'
-        if ($continue -notmatch '^[Yy]$') {
-            Write-Host '操作已取消。' -ForegroundColor Cyan
-            exit 1
+        $install = Read-Host '是否现在自动安装 Claude Code? (Y/N)'
+        if ($install -match '^[Yy]$') {
+            # 检查 npm 是否存在
+            if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
+                Write-Host ''
+                Write-Host '错误: 未检测到 npm，无法安装 Claude Code。' -ForegroundColor Red
+                $installNode = Read-Host '是否现在通过 winget 自动安装 Node.js (包含 npm)? (Y/N)'
+                if ($installNode -match '^[Yy]$') {
+                    Write-Host ''
+                    Write-Host '正在启动 winget 安装 Node.js...' -ForegroundColor Cyan
+                    winget install OpenJS.NodeJS
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Host ''
+                        Write-Host 'Node.js 安装请求已发送。' -ForegroundColor Green
+                        Write-Host '重要: 请在安装完成后【重启终端】, 然后重新运行此脚本。' -ForegroundColor Yellow
+                        Read-Host '按回车键退出...'
+                        exit 0
+                    } else {
+                        Write-Host 'winget 安装失败。请手动前往 https://nodejs.org 安装。' -ForegroundColor Red
+                    }
+                }
+                exit 1
+            }
+
+            Write-Host ''
+            Write-Host '正在通过 npm 安装 @anthropic-ai/claude-code...' -ForegroundColor Cyan
+            Write-Host '这可能需要一两分钟，请稍候...' -ForegroundColor Gray
+            
+            npm install -g @anthropic-ai/claude-code
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host ''
+                Write-Host 'Claude Code 安装成功！' -ForegroundColor Green
+                Start-Sleep -Seconds 1
+            } else {
+                Write-Host ''
+                Write-Host '安装失败，请尝试以管理员权限运行终端，或检查网络连接。' -ForegroundColor Red
+                $continue = Read-Host '是否仍要继续配置环境变量? (Y/N)'
+                if ($continue -notmatch '^[Yy]$') {
+                    exit 1
+                }
+            }
+        } else {
+            $continue = Read-Host '是否仍要继续配置环境变量? (Y/N)'
+            if ($continue -notmatch '^[Yy]$') {
+                Write-Host '操作已取消。' -ForegroundColor Cyan
+                exit 1
+            }
         }
     } else {
         $version = claude --version
