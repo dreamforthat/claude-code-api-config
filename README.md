@@ -36,7 +36,7 @@
 
 | 项目 | 值 |
 |------|-----|
-| 官网 | [MIMO API](https://platform.xiaomimimo.com/console/plan-manage) |
+| 官网 | [MIMO API](https://platform.xiaomimimo.com/console/api-keys) |
 | 端点 | `https://api.xiaomimimo.com/anthropic` |
 | 主模型 | `mimo-v2.5-pro` |
 | 轻量模型 | `mimo-v2.5` |
@@ -46,6 +46,7 @@
 
 | 项目 | 值 |
 |------|-----|
+| 官网 | [ DeepSeek API ](https://platform.deepseek.com/usage) |
 | 端点 | `https://api.deepseek.com/anthropic` |
 | 主模型 | `deepseek-v4-pro[1m]` |
 | 轻量模型 | `deepseek-v4-flash` |
