@@ -1,3 +1,8 @@
+[简体中文](#简体中文) | [English](#english)
+
+---
+
+<a id="简体中文"></a>
 # Claude Code API 配置工具
 
 > 一键配置 Claude Code 使用第三方 API（MIMO、DeepSeek）的 Windows 自动化脚本
@@ -8,11 +13,12 @@
 
 ## 项目简介
 
-本工具帮助 Windows 用户快速配置 Claude Code 使用第三方 API 服务，无需手动设置环境变量。通过交互式界面，您可以轻松切换不同的 API 提供商。
+本工具帮助 Windows 用户快速配置 Claude Code 使用第三方 API 服务，无需手动设置环境变量。通过交互式界面，您可以轻松切换不同的 API 提供商。脚本内置中英双语支持，可自由切换语言。
 
 ## 功能特性
 
 - **交互式菜单** - 简单直观的选项界面
+- **中英双语** - 脚本内置简体中文和 English，无第三方依赖
 - **多 API 支持** - 支持 MIMO（套餐/按量）和 DeepSeek
 - **密钥安全输入** - 输入时隐藏字符，保护 API 密钥
 - **自动验证** - 配置前自动验证 API 密钥有效性
@@ -119,17 +125,19 @@ cd path\to\claude-code-api-config
 ```
 1. 运行脚本
    ↓
-2. 检测 Claude Code 安装状态
+2. 选择语言（中文/English）
    ↓
-3. 选择 API 提供商（1/2/3）
+3. 检测 Claude Code 安装状态
    ↓
-4. 输入 API 密钥（不显示字符）
+4. 选择 API 提供商（1/2/3）
    ↓
-5. 自动验证密钥有效性
+5. 输入 API 密钥（不显示字符）
    ↓
-6. 配置环境变量
+6. 自动验证密钥有效性
    ↓
-7. 重启终端生效
+7. 配置环境变量
+   ↓
+8. 重启终端生效
 ```
 
 ### 配置验证
@@ -256,6 +264,7 @@ cd claude-code-api-config
 - 支持 DeepSeek API
 - 自动验证 API 密钥
 - 检测 Claude Code 安装状态
+- 支持中英双语输出
 
 ## 相关链接
 
@@ -277,4 +286,276 @@ cd claude-code-api-config
 
 ---
 
-**如果这个项目对您有帮助，请给个 Star 支持一下！**
+<a id="english"></a>
+# Claude Code API Config Tool
+
+> A one-click Windows automation script to configure Claude Code for third-party APIs (MIMO, DeepSeek).
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Platform](https://img.shields.io/badge/platform-Windows-blue.svg)](https://www.microsoft.com/windows)
+[![PowerShell](https://img.shields.io/badge/PowerShell-5.1+-blue.svg)](https://github.com/PowerShell/PowerShell)
+
+## Introduction
+
+This tool helps Windows users quickly configure Claude Code to use third-party API services without manually setting environment variables. With an interactive interface, you can easily switch between different API providers. The script has built-in bilingual support (English and Simplified Chinese) without relying on any external tools.
+
+## Features
+
+- **Interactive Menu** - Simple and intuitive interface
+- **Bilingual** - Built-in Chinese and English output
+- **Multi-API Support** - Supports MIMO (Plan/Pay-as-you-go) and DeepSeek
+- **Secure Key Input** - Characters are hidden during input to protect API keys
+- **Auto Validation** - Automatically verifies API key validity before applying config
+- **Environment Detection** - Detects if Claude Code is installed
+- **Persistent Config** - Uses `setx` to permanently save environment variables
+- **Colorful Output** - Clear status prompts and error messages
+
+## Supported API Providers
+
+### 1. MIMO API (Plan)
+
+| Item | Value |
+|------|-----|
+| Website | [MIMO API](https://platform.xiaomimimo.com/console/plan-manage) |
+| Endpoint | China: `https://token-plan-cn.xiaomimimo.com/anthropic`<br>Singapore: `https://token-plan-sgp.xiaomimimo.com/anthropic`<br>Europe: `https://token-plan-ams.xiaomimimo.com/anthropic` |
+| Main Model | `mimo-v2.5-pro` |
+| Light Model | `mimo-v2.5` |
+| Features | Fixed plan, suitable for high-frequency usage |
+
+### 2. MIMO API (Pay-as-you-go)
+
+| Item | Value |
+|------|-----|
+| Website | [MIMO API](https://platform.xiaomimimo.com/console/api-keys) |
+| Endpoint | `https://api.xiaomimimo.com/anthropic` |
+| Main Model | `mimo-v2.5-pro` |
+| Light Model | `mimo-v2.5` |
+| Features | Pay-as-you-go, flexible and controllable |
+
+### 3. DeepSeek API
+
+| Item | Value |
+|------|-----|
+| Website | [ DeepSeek API ](https://platform.deepseek.com/usage) |
+| Endpoint | `https://api.deepseek.com/anthropic` |
+| Main Model | `deepseek-v4-pro[1m]` |
+| Light Model | `deepseek-v4-flash` |
+| Features | Chinese LLM, highly cost-effective |
+
+## System Requirements
+
+- **OS**: Windows 10/11
+- **PowerShell**: 5.1 or higher
+- **Node.js**: 16.0 or higher (for installing Claude Code)
+- **Claude Code**: Installed via `npm install -g @anthropic-ai/claude-code`
+
+## Installation
+
+### Method 1: One-click run (Recommended)
+
+If you don't want to clone the repository, you can run the following command directly.
+
+**Run in PowerShell:**
+
+```powershell
+iex ((irm https://raw.githubusercontent.com/dreamforthat/claude-code-api-config/main/setup-claude-api.ps1) -replace '^\uFEFF', '')
+```
+
+**Run in CMD Prompt:**
+
+```cmd
+powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((irm https://raw.githubusercontent.com/dreamforthat/claude-code-api-config/main/setup-claude-api.ps1) -replace '^\uFEFF', '')"
+```
+
+> **Note**: This command will download and execute the configuration script directly. Please ensure your network can access GitHub.
+
+### Method 2: Download Release
+
+1. Go to the [Releases](https://github.com/dreamforthat/claude-code-api-config/releases) page
+2. Download the latest `claude-code-api-config.zip`
+3. Extract to any directory
+4. Double-click `setup-claude-api.bat` to run
+
+### Method 3: Clone Repository
+
+```bash
+git clone https://github.com/dreamforthat/claude-code-api-config.git
+cd claude-code-api-config
+```
+
+## Usage
+
+### Quick Start
+
+**Option 1: Double-click to run (Recommended)**
+
+Directly double-click the `setup-claude-api.bat` file and follow the prompts.
+
+**Option 2: Run in PowerShell**
+
+```powershell
+# Enter script directory
+cd path\to\claude-code-api-config
+
+# Run script
+.\setup-claude-api.ps1
+
+# View help
+.\setup-claude-api.ps1 -Help
+```
+
+### Operation Flow
+
+```
+1. Run script
+   ↓
+2. Select Language (CN/EN)
+   ↓
+3. Detect Claude Code installation
+   ↓
+4. Select API provider (1/2/3)
+   ↓
+5. Input API Key (Hidden characters)
+   ↓
+6. Auto validate key
+   ↓
+7. Configure environment variables
+   ↓
+8. Restart terminal to take effect
+```
+
+### Configuration Validation
+
+After configuration, restart your terminal and run the following commands to verify:
+
+```powershell
+# Check Anthropic related variables
+Get-ChildItem Env:ANTHROPIC*
+
+# Check Claude related variables
+Get-ChildItem Env:CLAUDE*
+
+# Test if Claude Code works properly
+claude --version
+```
+
+## Environment Variables Reference
+
+The script sets the following system environment variables:
+
+| Variable | Description | Example Value |
+|---------|------|--------|
+| `ANTHROPIC_BASE_URL` | API proxy URL | `https://api.deepseek.com/anthropic` |
+| `ANTHROPIC_AUTH_TOKEN` | API Key | `sk-xxxxxxxx` |
+| `ANTHROPIC_MODEL` | Main model | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_OPUS_MODEL` | Mapped Opus model | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL` | Mapped Sonnet model | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | Mapped Haiku model | `deepseek-v4-flash` |
+| `CLAUDE_CODE_SUBAGENT_MODEL` | Subagent model | `deepseek-v4-flash` |
+| `CLAUDE_CODE_EFFORT_LEVEL` | Thinking effort | `max` |
+| `CLAUDE_CONTEXT_CAPACITY_OVERRIDE` | Context capacity | `1000000` |
+| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | Auto-compact threshold | `100` |
+
+## FAQ
+
+### Q1: "Claude Code not detected" prompt
+
+**Solution:**
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+### Q2: API Key verification failed
+
+**Possible Causes:**
+- Incorrect key input
+- Key expired or insufficient balance
+- Network connection issues
+
+**Solutions:**
+1. Check if the key is correct
+2. Login to the provider's website to check key status
+3. Check your network connection
+
+### Q3: Configuration does not take effect
+
+**Solutions:**
+1. Make sure you have restarted the terminal
+2. Check variables: `set ANTHROPIC`
+3. Try logging out and logging back into Windows
+
+### Q4: How to switch API provider?
+
+Simply run the script again and select a new provider. The new config will overwrite the old one.
+
+### Q5: How to restore default configuration?
+
+```powershell
+# Remove all related environment variables
+[Environment]::SetEnvironmentVariable("ANTHROPIC_BASE_URL", $null, "User")
+[Environment]::SetEnvironmentVariable("ANTHROPIC_AUTH_TOKEN", $null, "User")
+[Environment]::SetEnvironmentVariable("ANTHROPIC_MODEL", $null, "User")
+# ... Similar for other variables
+```
+
+## Security Notes
+
+- API Keys are hidden during input
+- Keys are stored in Windows User Environment Variables (visible only to the current user)
+- The script does NOT upload or store any sensitive information
+- It is recommended to rotate API keys periodically
+
+## Development
+
+### Project Structure
+
+```
+claude-code-api-config/
+├── setup-claude-api.ps1    # Main PowerShell script
+├── setup-claude-api.bat    # Batch launcher
+└── README.md               # This file
+```
+
+### Local Development
+
+```powershell
+git clone https://github.com/dreamforthat/claude-code-api-config.git
+cd claude-code-api-config
+.\setup-claude-api.ps1 -Help
+```
+
+### Contributing
+
+Issues and Pull Requests are welcome!
+
+1. Fork the repo
+2. Create feature branch: `git checkout -b feature/your-feature`
+3. Commit changes: `git commit -m 'Add some feature'`
+4. Push branch: `git push origin feature/your-feature`
+5. Submit Pull Request
+
+## Changelog
+
+### v1.0.0 (2025-05-22)
+- Initial Release
+- Support MIMO API (Plan & Pay-as-you-go)
+- Support DeepSeek API
+- Auto validate API keys
+- Detect Claude Code installation
+- Bilingual (Chinese/English) support built-in
+
+## Related Links
+
+- [Claude Code Official Docs](https://docs.anthropic.com/claude-code)
+- [MIMO API](https://platform.xiaomimimo.com/console/plan-manage)
+- [DeepSeek API](https://platform.deepseek.com)
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+## Acknowledgements
+
+- [Anthropic](https://www.anthropic.com) - Creators of Claude Code
+- [MIMO](https://xiaomimimo.com) - API Provider
+- [DeepSeek](https://deepseek.com) - API Provider
