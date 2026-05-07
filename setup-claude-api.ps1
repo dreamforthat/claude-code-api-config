@@ -195,8 +195,7 @@ function Set-ApiConfig {
     }
     
     if ($ProviderName -match 'MIMO') {
-        $envVars['CLAUDE_CONTEXT_CAPACITY_OVERRIDE'] = '1000000'
-        $envVars['CLAUDE_AUTOCOMPACT_PCT_OVERRIDE'] = '100'
+        $envVars['CLAUDE_AUTOCOMPACT_PCT_OVERRIDE'] = '80'
     }
 
     foreach ($var in $envVars.GetEnumerator()) {

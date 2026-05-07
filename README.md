@@ -169,8 +169,7 @@ claude --version
 | `ANTHROPIC_DEFAULT_HAIKU_MODEL` | 映射 Haiku 模型 (1M 上下文) | `mimo-v2.5[1m]` | `deepseek-v4-flash[1m]` |
 | `CLAUDE_CODE_SUBAGENT_MODEL` | Subagent 辅助模型 | `mimo-v2.5` | `deepseek-v4-flash` |
 | `CLAUDE_CODE_EFFORT_LEVEL` | 思考程度 | `max` | `max` |
-| `CLAUDE_CONTEXT_CAPACITY_OVERRIDE` | 上下文限制  | `1000000` | - |
-| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | 自动压缩阈值  | `100` | - |
+| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | 自动压缩阈值  | `80` | - |
 
 ## 常见问题
 
@@ -453,8 +452,7 @@ The script sets the following system environment variables:
 | `ANTHROPIC_DEFAULT_HAIKU_MODEL` | Mapped Haiku model (1M context) | `mimo-v2.5[1m]` | `deepseek-v4-flash[1m]` |
 | `CLAUDE_CODE_SUBAGENT_MODEL` | Subagent model | `mimo-v2.5` | `deepseek-v4-flash` |
 | `CLAUDE_CODE_EFFORT_LEVEL` | Thinking effort | `max` | `max` |
-| `CLAUDE_CONTEXT_CAPACITY_OVERRIDE` | Context capacity | `1000000` | - |
-| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | Auto-compact threshold | `100` | - |
+| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | Auto-compact threshold | `80` | - |
 
 ## FAQ
 
