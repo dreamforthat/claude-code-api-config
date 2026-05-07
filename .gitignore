@@ -24,6 +24,7 @@ logs/
 *.tmp
 *.temp
 ~$*
+*.zip
 
 # API keys and secrets
 .env
