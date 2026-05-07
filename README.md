@@ -66,7 +66,7 @@
 如果您不想克隆仓库，可以直接在 PowerShell 中运行以下命令：
 
 ```powershell
-iex (irm https://raw.githubusercontent.com/dreamforthat/claude-code-api-config/main/setup-claude-api.ps1)
+iex ((irm https://raw.githubusercontent.com/dreamforthat/claude-code-api-config/main/setup-claude-api.ps1) -replace '^\uFEFF', '')
 ```
 
 > **注意**: 此命令会下载并直接执行配置脚本，请确保您的网络环境可以访问 GitHub。
