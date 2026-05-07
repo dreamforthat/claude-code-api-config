@@ -173,8 +173,10 @@ function Set-ApiConfig {
     param(
         [string]$ProviderName,
         [string]$BaseUrl,
-        [string]$Model,
+        [string]$OpusModel,
+        [string]$SonnetModel,
         [string]$HaikuModel,
+        [string]$SubagentModel,
         [string]$ApiKey
     )
 
@@ -184,11 +186,11 @@ function Set-ApiConfig {
     $envVars = @{
         'ANTHROPIC_BASE_URL' = $BaseUrl
         'ANTHROPIC_AUTH_TOKEN' = $ApiKey
-        'ANTHROPIC_MODEL' = $Model
-        'ANTHROPIC_DEFAULT_OPUS_MODEL' = $Model
-        'ANTHROPIC_DEFAULT_SONNET_MODEL' = $Model
+        'ANTHROPIC_MODEL' = $OpusModel
+        'ANTHROPIC_DEFAULT_OPUS_MODEL' = $OpusModel
+        'ANTHROPIC_DEFAULT_SONNET_MODEL' = $SonnetModel
         'ANTHROPIC_DEFAULT_HAIKU_MODEL' = $HaikuModel
-        'CLAUDE_CODE_SUBAGENT_MODEL' = $HaikuModel
+        'CLAUDE_CODE_SUBAGENT_MODEL' = $SubagentModel
         'CLAUDE_CODE_EFFORT_LEVEL' = 'max'
     }
     
@@ -246,7 +248,7 @@ function Handle-MimoConfig {
         }
     }
 
-    return Set-ApiConfig -ProviderName $providerName -BaseUrl $baseUrl -Model 'mimo-v2.5-pro' -HaikuModel 'mimo-v2.5' -ApiKey $apiKey
+    return Set-ApiConfig -ProviderName $providerName -BaseUrl $baseUrl -OpusModel 'mimo-v2.5-pro[1m]' -SonnetModel 'mimo-v2.5-pro' -HaikuModel 'mimo-v2.5[1m]' -SubagentModel 'mimo-v2.5' -ApiKey $apiKey
 }
 
 function Handle-DeepSeekConfig {
@@ -261,7 +263,7 @@ function Handle-DeepSeekConfig {
         return $false
     }
 
-    $isValid = Test-ApiKey -BaseUrl $baseUrl -ApiKey $apiKey -Model 'deepseek-v4-pro[1m]'
+    $isValid = Test-ApiKey -BaseUrl $baseUrl -ApiKey $apiKey -Model 'deepseek-v4-pro'
     if (-not $isValid) {
         $force = Read-Host (L '验证失败。是否强制应用配置? (Y/N)' 'Verification failed. Force apply configuration? (Y/N)')
         if ($force -notmatch '^[Yy]$') {
@@ -269,7 +271,7 @@ function Handle-DeepSeekConfig {
         }
     }
 
-    return Set-ApiConfig -ProviderName $providerName -BaseUrl $baseUrl -Model 'deepseek-v4-pro[1m]' -HaikuModel 'deepseek-v4-flash' -ApiKey $apiKey
+    return Set-ApiConfig -ProviderName $providerName -BaseUrl $baseUrl -OpusModel 'deepseek-v4-pro[1m]' -SonnetModel 'deepseek-v4-pro' -HaikuModel 'deepseek-v4-flash[1m]' -SubagentModel 'deepseek-v4-flash' -ApiKey $apiKey
 }
 
 function Show-Result {

@@ -159,18 +159,18 @@ claude --version
 
 配置完成后，脚本将设置以下系统环境变量：
 
-| 环境变量 | 说明 | 示例值 |
-|---------|------|--------|
-| `ANTHROPIC_BASE_URL` | API 代理地址 | `https://api.deepseek.com/anthropic` |
-| `ANTHROPIC_AUTH_TOKEN` | API 密钥 | `sk-xxxxxxxx` |
-| `ANTHROPIC_MODEL` | 指定主模型 | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_OPUS_MODEL` | 映射 Opus 模型 | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_SONNET_MODEL` | 映射 Sonnet 模型 | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | 映射 Haiku 模型 | `deepseek-v4-flash` |
-| `CLAUDE_CODE_SUBAGENT_MODEL` | Subagent 辅助模型 | `deepseek-v4-flash` |
-| `CLAUDE_CODE_EFFORT_LEVEL` | 思考程度 | `max` |
-| `CLAUDE_CONTEXT_CAPACITY_OVERRIDE` | 上下文限制  | `1000000` |
-| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | 自动压缩阈值  | `100` |
+| 环境变量 | 说明 | MIMO 示例值 | DeepSeek 示例值 |
+|---------|------|--------|--------|
+| `ANTHROPIC_BASE_URL` | API 代理地址 | `https://token-plan-cn.xiaomimimo.com/anthropic` | `https://api.deepseek.com/anthropic` |
+| `ANTHROPIC_AUTH_TOKEN` | API 密钥 | `sk-xxxxxxxx` | `sk-xxxxxxxx` |
+| `ANTHROPIC_MODEL` | 指定主模型 | `mimo-v2.5-pro[1m]` | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_OPUS_MODEL` | 映射 Opus 模型 | `mimo-v2.5-pro[1m]` | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL` | 映射 Sonnet 模型 | `mimo-v2.5-pro` | `deepseek-v4-pro` |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | 映射 Haiku 模型 (1M 上下文) | `mimo-v2.5[1m]` | `deepseek-v4-flash[1m]` |
+| `CLAUDE_CODE_SUBAGENT_MODEL` | Subagent 辅助模型 | `mimo-v2.5` | `deepseek-v4-flash` |
+| `CLAUDE_CODE_EFFORT_LEVEL` | 思考程度 | `max` | `max` |
+| `CLAUDE_CONTEXT_CAPACITY_OVERRIDE` | 上下文限制  | `1000000` | - |
+| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | 自动压缩阈值  | `100` | - |
 
 ## 常见问题
 
@@ -443,18 +443,18 @@ claude --version
 
 The script sets the following system environment variables:
 
-| Variable | Description | Example Value |
-|---------|------|--------|
-| `ANTHROPIC_BASE_URL` | API proxy URL | `https://api.deepseek.com/anthropic` |
-| `ANTHROPIC_AUTH_TOKEN` | API Key | `sk-xxxxxxxx` |
-| `ANTHROPIC_MODEL` | Main model | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_OPUS_MODEL` | Mapped Opus model | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_SONNET_MODEL` | Mapped Sonnet model | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | Mapped Haiku model | `deepseek-v4-flash` |
-| `CLAUDE_CODE_SUBAGENT_MODEL` | Subagent model | `deepseek-v4-flash` |
-| `CLAUDE_CODE_EFFORT_LEVEL` | Thinking effort | `max` |
-| `CLAUDE_CONTEXT_CAPACITY_OVERRIDE` | Context capacity | `1000000` |
-| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | Auto-compact threshold | `100` |
+| Variable | Description | MIMO Example | DeepSeek Example |
+|---------|------|--------|--------|
+| `ANTHROPIC_BASE_URL` | API proxy URL | `https://token-plan-cn.xiaomimimo.com/anthropic` | `https://api.deepseek.com/anthropic` |
+| `ANTHROPIC_AUTH_TOKEN` | API Key | `sk-xxxxxxxx` | `sk-xxxxxxxx` |
+| `ANTHROPIC_MODEL` | Main model | `mimo-v2.5-pro[1m]` | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_OPUS_MODEL` | Mapped Opus model | `mimo-v2.5-pro[1m]` | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL` | Mapped Sonnet model | `mimo-v2.5-pro` | `deepseek-v4-pro` |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | Mapped Haiku model (1M context) | `mimo-v2.5[1m]` | `deepseek-v4-flash[1m]` |
+| `CLAUDE_CODE_SUBAGENT_MODEL` | Subagent model | `mimo-v2.5` | `deepseek-v4-flash` |
+| `CLAUDE_CODE_EFFORT_LEVEL` | Thinking effort | `max` | `max` |
+| `CLAUDE_CONTEXT_CAPACITY_OVERRIDE` | Context capacity | `1000000` | - |
+| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | Auto-compact threshold | `100` | - |
 
 ## FAQ
 
