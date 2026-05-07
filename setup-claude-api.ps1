@@ -197,8 +197,18 @@ function Handle-MimoConfig {
     param([string]$Type)
     
     if ($Type -eq 'Plan') {
-        $baseUrl = 'https://token-plan-cn.xiaomimimo.com/anthropic'
-        $providerName = 'MIMO 套餐计费'
+        Write-Host ''
+        Write-Host '请选择 MIMO 套餐计费集群地区:' -ForegroundColor Yellow
+        Write-Host '  [1] 中国集群 (默认)' -ForegroundColor Green
+        Write-Host '  [2] 新加坡集群' -ForegroundColor Green
+        Write-Host '  [3] 欧洲集群' -ForegroundColor Green
+        
+        $regionChoice = Read-Host '请输入选项 (1, 2, 3)'
+        switch ($regionChoice) {
+            '2' { $baseUrl = 'https://token-plan-sgp.xiaomimimo.com/anthropic'; $providerName = 'MIMO 套餐计费 (新加坡)' }
+            '3' { $baseUrl = 'https://token-plan-ams.xiaomimimo.com/anthropic'; $providerName = 'MIMO 套餐计费 (欧洲)' }
+            default { $baseUrl = 'https://token-plan-cn.xiaomimimo.com/anthropic'; $providerName = 'MIMO 套餐计费 (中国)' }
+        }
     } else {
         $baseUrl = 'https://api.xiaomimimo.com/anthropic'
         $providerName = 'MIMO 按量计费'

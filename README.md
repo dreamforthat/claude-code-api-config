@@ -27,7 +27,7 @@
 | 项目 | 值 |
 |------|-----|
 | 官网 | [MIMO API](https://platform.xiaomimimo.com/console/plan-manage) |
-| 端点 | `https://token-plan-cn.xiaomimimo.com/anthropic` |
+| 端点 | 中国：`https://token-plan-cn.xiaomimimo.com/anthropic`<br>新加坡：`https://token-plan-sgp.xiaomimimo.com/anthropic`<br>欧洲：`https://token-plan-ams.xiaomimimo.com/anthropic` |
 | 主模型 | `mimo-v2.5-pro` |
 | 轻量模型 | `mimo-v2.5` |
 | 特点 | 固定套餐，适合高频使用 |
@@ -63,10 +63,18 @@
 
 ### 方式一：一键运行 (推荐)
 
-如果您不想克隆仓库，可以直接在 PowerShell 中运行以下命令：
+如果您不想克隆仓库，可以直接运行以下命令。
+
+**在 PowerShell 中运行：**
 
 ```powershell
 iex ((irm https://raw.githubusercontent.com/dreamforthat/claude-code-api-config/main/setup-claude-api.ps1) -replace '^\uFEFF', '')
+```
+
+**在 CMD 命令提示符中运行：**
+
+```cmd
+powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((irm https://raw.githubusercontent.com/dreamforthat/claude-code-api-config/main/setup-claude-api.ps1) -replace '^\uFEFF', '')"
 ```
 
 > **注意**: 此命令会下载并直接执行配置脚本，请确保您的网络环境可以访问 GitHub。
