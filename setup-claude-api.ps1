@@ -135,15 +135,23 @@ function Get-SecureApiKey {
 }
 
 function Test-ApiKey {
-    param([string]$BaseUrl, [string]$ApiKey, [string]$Model)
-    
+    param([string]$BaseUrl, [string]$ApiKey, [string]$Model, [string]$ProviderName)
+
     Write-Host ''
     Write-Host (L '正在验证 API 密钥，请稍候...' 'Verifying API Key, please wait...') -ForegroundColor Cyan
     $endpoint = "$BaseUrl/v1/messages"
-    $headers = @{
-        "x-api-key" = $ApiKey
-        "anthropic-version" = "2023-06-01"
-        "Content-Type" = "application/json"
+
+    if ($ProviderName -match 'MIMO') {
+        $headers = @{
+            "api-key" = $ApiKey
+            "Content-Type" = "application/json"
+        }
+    } else {
+        $headers = @{
+            "x-api-key" = $ApiKey
+            "anthropic-version" = "2023-06-01"
+            "Content-Type" = "application/json"
+        }
     }
     
     $body = @{
@@ -239,7 +247,7 @@ function Handle-MimoConfig {
         return $false
     }
 
-    $isValid = Test-ApiKey -BaseUrl $baseUrl -ApiKey $apiKey -Model 'mimo-v2.5-pro'
+    $isValid = Test-ApiKey -BaseUrl $baseUrl -ApiKey $apiKey -Model 'mimo-v2.5-pro' -ProviderName $providerName
     if (-not $isValid) {
         $force = Read-Host (L '验证失败。是否强制应用配置? (Y/N)' 'Verification failed. Force apply configuration? (Y/N)')
         if ($force -notmatch '^[Yy]$') {
@@ -262,7 +270,7 @@ function Handle-DeepSeekConfig {
         return $false
     }
 
-    $isValid = Test-ApiKey -BaseUrl $baseUrl -ApiKey $apiKey -Model 'deepseek-v4-pro'
+    $isValid = Test-ApiKey -BaseUrl $baseUrl -ApiKey $apiKey -Model 'deepseek-v4-pro' -ProviderName $providerName
     if (-not $isValid) {
         $force = Read-Host (L '验证失败。是否强制应用配置? (Y/N)' 'Verification failed. Force apply configuration? (Y/N)')
         if ($force -notmatch '^[Yy]$') {
