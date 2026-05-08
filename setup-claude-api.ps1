@@ -35,7 +35,8 @@ if ($Help) {
 Write-Host "Please select language / 请选择语言:" -ForegroundColor Cyan
 Write-Host "  [1] 简体中文 (默认/Default)" -ForegroundColor Green
 Write-Host "  [2] English" -ForegroundColor Green
-$langChoice = Read-Host "Input option / 请输入选项 (1/2)"
+$langChoice = Read-Host "请输入选项 (1/2，默认1) / Input option (1/2, default 1)"
+if ([string]::IsNullOrWhiteSpace($langChoice)) { $langChoice = '1' }
 if ($langChoice -eq '2') {
     $global:Lang = 'en'
 }
@@ -177,6 +178,51 @@ function Test-ApiKey {
     }
 }
 
+function Get-ClaudeEnvVars {
+    $patterns = @('ANTHROPIC_', 'CLAUDE_', 'CLAUDE_CODE_', 'DISABLE_PROMPT_CACHING')
+    $userVars = [Environment]::GetEnvironmentVariables("User")
+    $found = @()
+    foreach ($key in $userVars.Keys) {
+        foreach ($p in $patterns) {
+            if ($key.StartsWith($p, [System.StringComparison]::OrdinalIgnoreCase)) {
+                $found += [PSCustomObject]@{ Name = $key; Value = $userVars[$key] }
+                break
+            }
+        }
+    }
+    return $found
+}
+
+function Show-ClaudeEnvVars {
+    $vars = Get-ClaudeEnvVars
+    Write-Host ''
+    Write-Host (L '当前系统中 Claude Code 相关的环境变量:' 'Current Claude Code related environment variables:') -ForegroundColor Cyan
+    Write-Host '-------------------------------------------' -ForegroundColor DarkGray
+    if ($vars.Count -eq 0) {
+        Write-Host (L '  (未检测到)' '  (None detected)') -ForegroundColor DarkGray
+    } else {
+        foreach ($v in $vars) {
+            $display = if ($v.Value.Length -gt 50) { $v.Value.Substring(0, 47) + '...' } else { $v.Value }
+            Write-Host "  $($v.Name) = $display" -ForegroundColor Yellow
+        }
+    }
+    Write-Host '-------------------------------------------' -ForegroundColor DarkGray
+    Write-Host (L "共 $($vars.Count) 个相关变量" "Total: $($vars.Count) related variable(s)") -ForegroundColor Cyan
+}
+
+function Clear-ClaudeEnvVars {
+    $vars = Get-ClaudeEnvVars
+    if ($vars.Count -eq 0) {
+        Write-Host (L '没有需要清除的变量' 'No variables to clear') -ForegroundColor DarkGray
+        return
+    }
+    foreach ($v in $vars) {
+        [Environment]::SetEnvironmentVariable($v.Name, $null, "User")
+        Write-Host "  [OK] $($v.Name)" -ForegroundColor Green
+    }
+    Write-Host (L "已清除 $($vars.Count) 个变量" "Cleared $($vars.Count) variable(s)") -ForegroundColor Green
+}
+
 function Set-ApiConfig {
     param(
         [string]$ProviderName,
@@ -190,6 +236,24 @@ function Set-ApiConfig {
 
     Write-Host ''
     Write-Host (L "正在配置 $ProviderName API..." "Configuring $ProviderName API...") -ForegroundColor Cyan
+
+    Show-ClaudeEnvVars
+
+    Write-Host ''
+    Write-Host (L '请选择安装模式:' 'Please select install mode:') -ForegroundColor Yellow
+    Write-Host (L '  [1] 清洁安装（默认）- 清除所有相关变量后重新配置' '  [1] Clean Install (Default) - Clear all related vars then configure') -ForegroundColor Green
+    Write-Host (L '  [2] 常规安装 - 仅覆盖写入以下变量' '  [2] Normal Install - Only overwrite the following vars') -ForegroundColor Green
+    $installMode = Read-Host (L '请输入选项 (1/2，默认1)' 'Enter option (1/2, default 1)')
+    if ([string]::IsNullOrWhiteSpace($installMode)) { $installMode = '1' }
+
+    if ($installMode -eq '2') {
+        Write-Host ''
+        Write-Host (L '常规安装模式：仅覆盖写入以下变量' 'Normal mode: only overwriting these variables') -ForegroundColor Cyan
+    } else {
+        Write-Host ''
+        Write-Host (L '清洁安装模式：清除所有 Claude Code 相关变量' 'Clean mode: clearing all Claude Code related variables') -ForegroundColor Cyan
+        Clear-ClaudeEnvVars
+    }
 
     $envVars = @{
         'ANTHROPIC_BASE_URL' = $BaseUrl
@@ -228,7 +292,8 @@ function Handle-MimoConfig {
         Write-Host (L '  [2] 新加坡集群' '  [2] Singapore Cluster') -ForegroundColor Green
         Write-Host (L '  [3] 欧洲集群' '  [3] Europe Cluster') -ForegroundColor Green
         
-        $regionChoice = Read-Host (L '请输入选项 (1, 2, 3)' 'Enter option (1, 2, 3)')
+        $regionChoice = Read-Host (L '请输入选项 (1, 2, 3，默认1)' 'Enter option (1, 2, 3, default 1)')
+        if ([string]::IsNullOrWhiteSpace($regionChoice)) { $regionChoice = '1' }
         switch ($regionChoice) {
             '2' { $baseUrl = 'https://token-plan-sgp.xiaomimimo.com/anthropic'; $providerName = (L 'MIMO 套餐计费 (新加坡)' 'MIMO Plan (Singapore)') }
             '3' { $baseUrl = 'https://token-plan-ams.xiaomimimo.com/anthropic'; $providerName = (L 'MIMO 套餐计费 (欧洲)' 'MIMO Plan (Europe)') }
@@ -307,7 +372,8 @@ function Show-Result {
 # 主程序
 do {
     Show-Menu
-    $choice = Read-Host (L '请输入选项 (1, 2, 3, Q)' 'Enter option (1, 2, 3, Q)')
+    $choice = Read-Host (L '请输入选项 (1, 2, 3, Q，默认1)' 'Enter option (1, 2, 3, Q, default 1)')
+        if ([string]::IsNullOrWhiteSpace($choice)) { $choice = '1' }
 
     switch ($choice) {
         '1' {

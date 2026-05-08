@@ -12,6 +12,10 @@ This project provides a simple way to configure Claude Code to use third-party A
 - View help: `.\setup-claude-api.ps1 -Help`
 
 ## Configuration Details
+Before setting variables, the script scans all existing Claude Code related environment variables (`ANTHROPIC_*`, `CLAUDE_*`, `CLAUDE_CODE_*`, `DISABLE_PROMPT_CACHING`) and offers two install modes:
+- **Clean Install (default)**: Clears all related variables, then sets the ones below.
+- **Normal Install**: Only overwrites the variables below, leaving others intact.
+
 The script sets the following environment variables:
 - `ANTHROPIC_BASE_URL`
 - `ANTHROPIC_AUTH_TOKEN`

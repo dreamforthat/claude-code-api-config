@@ -23,6 +23,7 @@
 - **密钥安全输入** - 输入时隐藏字符，保护 API 密钥
 - **自动验证** - 配置前自动验证 API 密钥有效性
 - **环境检测** - 自动检测 Claude Code 是否已安装
+- **安装模式** - 清洁安装（清除所有相关变量）或常规安装（仅覆盖写入）
 - **持久化配置** - 使用 `setx` 永久保存环境变量
 - **彩色输出** - 清晰的状态提示和错误信息
 
@@ -125,20 +126,26 @@ cd path\to\claude-code-api-config
 ```
 1. 运行脚本
    ↓
-2. 选择语言（中文/English）
+2. 选择语言（中文/English，默认中文）
    ↓
 3. 检测 Claude Code 安装状态
    ↓
-4. 选择 API 提供商（1/2/3）
+4. 选择 API 提供商（1/2/3，默认1）
    ↓
 5. 输入 API 密钥（不显示字符）
    ↓
 6. 自动验证密钥有效性
    ↓
-7. 配置环境变量
+7. 显示当前 Claude Code 相关环境变量
    ↓
-8. 重启终端生效
+8. 选择安装模式（清洁安装/常规安装，默认清洁安装）
+   ↓
+9. 配置环境变量
+   ↓
+10. 重启终端生效
 ```
+
+> **提示**: 所有选择步骤直接按回车即可选择默认选项（选项1）。
 
 ### 配置验证
 
@@ -154,6 +161,23 @@ Get-ChildItem Env:CLAUDE*
 # 测试 Claude Code 是否正常工作
 claude --version
 ```
+
+## 安装模式
+
+配置前，脚本会自动扫描系统中所有 Claude Code 相关的环境变量（匹配 `ANTHROPIC_*`、`CLAUDE_*`、`CLAUDE_CODE_*`、`DISABLE_PROMPT_CACHING` 前缀），并列出当前值。
+
+### 清洁安装（默认）
+
+清除所有检测到的相关环境变量后，再写入新配置。适用于：
+- 首次配置
+- 切换 API 提供商
+- 遇到配置冲突或异常时
+
+### 常规安装
+
+仅覆盖写入脚本涉及的变量，不影响其他 Claude Code 相关变量。适用于：
+- 仅更新 API 密钥
+- 保留自定义配置的同时修改部分变量
 
 ## 环境变量说明
 
@@ -255,6 +279,13 @@ cd claude-code-api-config
 
 ## 更新日志
 
+### v1.1.0 (2026-05-08)
+
+- 新增环境变量扫描：配置前检测系统中所有 Claude Code 相关环境变量
+- 新增清洁安装模式：清除所有相关变量后重新配置（默认）
+- 新增常规安装模式：仅覆盖写入脚本涉及的变量
+- 所有选择菜单支持回车默认选选项1
+
 ### v1.0.0 (2025-05-22)
 
 - 初始发布
@@ -306,6 +337,7 @@ This tool helps Windows users quickly configure Claude Code to use third-party A
 - **Secure Key Input** - Characters are hidden during input to protect API keys
 - **Auto Validation** - Automatically verifies API key validity before applying config
 - **Environment Detection** - Detects if Claude Code is installed
+- **Install Modes** - Clean install (clear all related vars) or normal install (overwrite only)
 - **Persistent Config** - Uses `setx` to permanently save environment variables
 - **Colorful Output** - Clear status prompts and error messages
 
@@ -408,20 +440,26 @@ cd path\to\claude-code-api-config
 ```
 1. Run script
    ↓
-2. Select Language (CN/EN)
+2. Select Language (CN/EN, default: CN)
    ↓
 3. Detect Claude Code installation
    ↓
-4. Select API provider (1/2/3)
+4. Select API provider (1/2/3, default: 1)
    ↓
 5. Input API Key (Hidden characters)
    ↓
 6. Auto validate key
    ↓
-7. Configure environment variables
+7. Show current Claude Code environment variables
    ↓
-8. Restart terminal to take effect
+8. Select install mode (Clean/Normal, default: Clean)
+   ↓
+9. Configure environment variables
+   ↓
+10. Restart terminal to take effect
 ```
+
+> **Tip**: In all selection steps, simply press Enter to choose the default option (option 1).
 
 ### Configuration Validation
 
@@ -437,6 +475,23 @@ Get-ChildItem Env:CLAUDE*
 # Test if Claude Code works properly
 claude --version
 ```
+
+## Install Modes
+
+Before configuration, the script automatically scans all Claude Code related environment variables (matching `ANTHROPIC_*`, `CLAUDE_*`, `CLAUDE_CODE_*`, `DISABLE_PROMPT_CACHING` prefixes) and displays their current values.
+
+### Clean Install (Default)
+
+Clears all detected related environment variables, then writes the new configuration. Recommended for:
+- First-time setup
+- Switching API providers
+- Resolving configuration conflicts or issues
+
+### Normal Install
+
+Only overwrites the variables managed by this script, leaving other Claude Code related variables intact. Suitable for:
+- Updating only the API key
+- Modifying specific variables while preserving custom configurations
 
 ## Environment Variables Reference
 
@@ -533,6 +588,12 @@ Issues and Pull Requests are welcome!
 5. Submit Pull Request
 
 ## Changelog
+
+### v1.1.0 (2026-05-08)
+- Added environment variable scanning: detect all Claude Code related env vars before configuration
+- Added clean install mode: clear all related vars then reconfigure (default)
+- Added normal install mode: only overwrite vars managed by this script
+- All selection menus support pressing Enter to choose the default option (option 1)
 
 ### v1.0.0 (2025-05-22)
 - Initial Release
