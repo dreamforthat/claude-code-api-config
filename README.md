@@ -25,7 +25,7 @@
 - **密钥安全输入** - 输入时隐藏字符，保护 API 密钥
 - **自动验证** - 配置前自动验证 API 密钥有效性
 - **环境检测** - 自动检测 Claude Code 是否已安装
-- **持久化配置** - 永久保存环境变量
+- **持久化配置** - 使用 `setx` 永久保存环境变量
 - **彩色输出** - 清晰的状态提示和错误信息
 
 ## 支持的 API 提供商
@@ -167,20 +167,26 @@ bash setup-claude-api.sh
 ```
 1. 运行脚本
    ↓
-2. 选择语言（中文/English）
+2. 选择语言（中文/English，默认中文）
    ↓
 3. 检测 Claude Code 安装状态
    ↓
-4. 选择 API 提供商（1/2/3）
+4. 选择 API 提供商（1/2/3，默认1）
    ↓
 5. 输入 API 密钥（不显示字符）
    ↓
 6. 自动验证密钥有效性
    ↓
-7. 配置环境变量
+7. 显示当前 Claude Code 相关环境变量
    ↓
-8. 重启终端生效
+8. 选择安装模式（清洁安装/常规安装，默认清洁安装）
+   ↓
+9. 配置环境变量
+   ↓
+10. 重启终端生效
 ```
+
+> **提示**: 所有选择步骤直接按回车即可选择默认选项（选项1）。
 
 ### 配置验证
 
@@ -212,6 +218,23 @@ env | grep CLAUDE
 claude --version
 ```
 
+## 安装模式
+
+配置前，脚本会自动扫描系统中所有 Claude Code 相关的环境变量（匹配 `ANTHROPIC_*`、`CLAUDE_*`、`CLAUDE_CODE_*`、`DISABLE_PROMPT_CACHING` 前缀），并列出当前值。
+
+### 清洁安装（默认）
+
+清除所有检测到的相关环境变量后，再写入新配置。适用于：
+- 首次配置
+- 切换 API 提供商
+- 遇到配置冲突或异常时
+
+### 常规安装
+
+仅覆盖写入脚本涉及的变量，不影响其他 Claude Code 相关变量。适用于：
+- 仅更新 API 密钥
+- 保留自定义配置的同时修改部分变量
+
 ## 环境变量说明
 
 配置完成后，脚本将设置以下环境变量：
@@ -219,18 +242,17 @@ claude --version
 - **Windows**: 使用 `setx` 写入用户环境变量（永久生效）
 - **Linux / macOS**: 写入 `~/.bashrc` 和 `~/.zshrc`（需重启终端生效）
 
-| 环境变量 | 说明 | 示例值 |
-|---------|------|--------|
-| `ANTHROPIC_BASE_URL` | API 代理地址 | `https://api.deepseek.com/anthropic` |
-| `ANTHROPIC_AUTH_TOKEN` | API 密钥 | `sk-xxxxxxxx` |
-| `ANTHROPIC_MODEL` | 指定主模型 | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_OPUS_MODEL` | 映射 Opus 模型 | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_SONNET_MODEL` | 映射 Sonnet 模型 | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | 映射 Haiku 模型 | `deepseek-v4-flash` |
-| `CLAUDE_CODE_SUBAGENT_MODEL` | Subagent 辅助模型 | `deepseek-v4-flash` |
-| `CLAUDE_CODE_EFFORT_LEVEL` | 思考程度 | `max` |
-| `CLAUDE_CONTEXT_CAPACITY_OVERRIDE` | 上下文限制  | `1000000` |
-| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | 自动压缩阈值  | `100` |
+| 环境变量 | 说明 | MIMO 示例值 | DeepSeek 示例值 |
+|---------|------|--------|--------|
+| `ANTHROPIC_BASE_URL` | API 代理地址 | `https://token-plan-cn.xiaomimimo.com/anthropic` | `https://api.deepseek.com/anthropic` |
+| `ANTHROPIC_AUTH_TOKEN` | API 密钥 | `sk-xxxxxxxx` | `sk-xxxxxxxx` |
+| `ANTHROPIC_MODEL` | 指定主模型 | `mimo-v2.5-pro[1m]` | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_OPUS_MODEL` | 映射 Opus 模型 | `mimo-v2.5-pro[1m]` | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL` | 映射 Sonnet 模型 | `mimo-v2.5-pro` | `deepseek-v4-pro` |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | 映射 Haiku 模型 (1M 上下文) | `mimo-v2.5[1m]` | `deepseek-v4-flash[1m]` |
+| `CLAUDE_CODE_SUBAGENT_MODEL` | Subagent 辅助模型 | `mimo-v2.5` | `deepseek-v4-flash` |
+| `CLAUDE_CODE_EFFORT_LEVEL` | 思考程度 | `max` | `max` |
+| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | 自动压缩阈值  | `80` | - |
 
 ## 常见问题
 
@@ -359,12 +381,6 @@ cd claude-code-api-config
 
 ## 更新日志
 
-### v1.1.0 (2025-06-04)
-
-- 新增 Linux / macOS 支持（Bash 脚本）
-- 环境变量写入 `~/.bashrc` 和 `~/.zshrc`
-- 跨平台一键安装命令
-
 ### v1.0.0 (2025-05-22)
 
 - 初始发布
@@ -418,7 +434,7 @@ This tool helps Windows and Linux/macOS users quickly configure Claude Code to u
 - **Secure Key Input** - Characters are hidden during input to protect API keys
 - **Auto Validation** - Automatically verifies API key validity before applying config
 - **Environment Detection** - Detects if Claude Code is installed
-- **Persistent Config** - Permanently saves environment variables
+- **Persistent Config** - Uses `setx` to permanently save environment variables
 - **Colorful Output** - Clear status prompts and error messages
 
 ## Supported API Providers
@@ -560,20 +576,26 @@ bash setup-claude-api.sh
 ```
 1. Run script
    ↓
-2. Select Language (CN/EN)
+2. Select Language (CN/EN, default: CN)
    ↓
 3. Detect Claude Code installation
    ↓
-4. Select API provider (1/2/3)
+4. Select API provider (1/2/3, default: 1)
    ↓
 5. Input API Key (Hidden characters)
    ↓
 6. Auto validate key
    ↓
-7. Configure environment variables
+7. Show current Claude Code environment variables
    ↓
-8. Restart terminal to take effect
+8. Select install mode (Clean/Normal, default: Clean)
+   ↓
+9. Configure environment variables
+   ↓
+10. Restart terminal to take effect
 ```
+
+> **Tip**: In all selection steps, simply press Enter to choose the default option (option 1).
 
 ### Configuration Validation
 
@@ -605,6 +627,23 @@ env | grep CLAUDE
 claude --version
 ```
 
+## Install Modes
+
+Before configuration, the script automatically scans all Claude Code related environment variables (matching `ANTHROPIC_*`, `CLAUDE_*`, `CLAUDE_CODE_*`, `DISABLE_PROMPT_CACHING` prefixes) and displays their current values.
+
+### Clean Install (Default)
+
+Clears all detected related environment variables, then writes the new configuration. Recommended for:
+- First-time setup
+- Switching API providers
+- Resolving configuration conflicts or issues
+
+### Normal Install
+
+Only overwrites the variables managed by this script, leaving other Claude Code related variables intact. Suitable for:
+- Updating only the API key
+- Modifying specific variables while preserving custom configurations
+
 ## Environment Variables Reference
 
 The script sets the following environment variables:
@@ -612,18 +651,17 @@ The script sets the following environment variables:
 - **Windows**: Uses `setx` to write to user environment variables (persistent)
 - **Linux / macOS**: Writes to `~/.bashrc` and `~/.zshrc` (restart terminal to take effect)
 
-| Variable | Description | Example Value |
-|---------|------|--------|
-| `ANTHROPIC_BASE_URL` | API proxy URL | `https://api.deepseek.com/anthropic` |
-| `ANTHROPIC_AUTH_TOKEN` | API Key | `sk-xxxxxxxx` |
-| `ANTHROPIC_MODEL` | Main model | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_OPUS_MODEL` | Mapped Opus model | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_SONNET_MODEL` | Mapped Sonnet model | `deepseek-v4-pro[1m]` |
-| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | Mapped Haiku model | `deepseek-v4-flash` |
-| `CLAUDE_CODE_SUBAGENT_MODEL` | Subagent model | `deepseek-v4-flash` |
-| `CLAUDE_CODE_EFFORT_LEVEL` | Thinking effort | `max` |
-| `CLAUDE_CONTEXT_CAPACITY_OVERRIDE` | Context capacity | `1000000` |
-| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | Auto-compact threshold | `100` |
+| Variable | Description | MIMO Example | DeepSeek Example |
+|---------|------|--------|--------|
+| `ANTHROPIC_BASE_URL` | API proxy URL | `https://token-plan-cn.xiaomimimo.com/anthropic` | `https://api.deepseek.com/anthropic` |
+| `ANTHROPIC_AUTH_TOKEN` | API Key | `sk-xxxxxxxx` | `sk-xxxxxxxx` |
+| `ANTHROPIC_MODEL` | Main model | `mimo-v2.5-pro[1m]` | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_OPUS_MODEL` | Mapped Opus model | `mimo-v2.5-pro[1m]` | `deepseek-v4-pro[1m]` |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL` | Mapped Sonnet model | `mimo-v2.5-pro` | `deepseek-v4-pro` |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | Mapped Haiku model (1M context) | `mimo-v2.5[1m]` | `deepseek-v4-flash[1m]` |
+| `CLAUDE_CODE_SUBAGENT_MODEL` | Subagent model | `mimo-v2.5` | `deepseek-v4-flash` |
+| `CLAUDE_CODE_EFFORT_LEVEL` | Thinking effort | `max` | `max` |
+| `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | Auto-compact threshold | `80` | - |
 
 ## FAQ
 
@@ -744,11 +782,6 @@ Issues and Pull Requests are welcome!
 5. Submit Pull Request
 
 ## Changelog
-
-### v1.1.0 (2025-06-04)
-- Added Linux / macOS support (Bash script)
-- Environment variables written to `~/.bashrc` and `~/.zshrc`
-- Cross-platform one-click installation commands
 
 ### v1.0.0 (2025-05-22)
 - Initial Release
