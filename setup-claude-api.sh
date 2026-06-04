@@ -52,7 +52,10 @@ fi
 echo -e "${CYAN}Please select language / 请选择语言:${NC}"
 echo -e "${GREEN}  [1] 简体中文 (默认/Default)${NC}"
 echo -e "${GREEN}  [2] English${NC}"
-read -p "Input option / 请输入选项 (1/2): " lang_choice
+read -p "Input option / 请输入选项 (1/2, 默认1): " lang_choice
+if [[ -z "$lang_choice" ]]; then
+    lang_choice="1"
+fi
 if [[ "$lang_choice" == "2" ]]; then
     LANG_CODE='en'
 fi
@@ -169,6 +172,7 @@ test_api_key() {
     local base_url="$1"
     local api_key="$2"
     local model="$3"
+    local provider_name="$4"
 
     if ! command -v curl &> /dev/null; then
         echo -e "${RED}$(L '错误: 未检测到 curl 命令，无法进行 API 密钥验证。' 'Error: curl command not detected, cannot verify API key.')${NC}"
@@ -191,11 +195,18 @@ EOF
 
     local response
     local http_code
-    response=$(curl -s -w "\n%{http_code}" -X POST "$endpoint" \
-        -H "x-api-key: $api_key" \
-        -H "anthropic-version: 2023-06-01" \
-        -H "Content-Type: application/json" \
-        -d "$body" 2>&1)
+    if [[ "$provider_name" =~ MIMO ]]; then
+        response=$(curl -s -w "\n%{http_code}" -X POST "$endpoint" \
+            -H "api-key: $api_key" \
+            -H "Content-Type: application/json" \
+            -d "$body" 2>&1)
+    else
+        response=$(curl -s -w "\n%{http_code}" -X POST "$endpoint" \
+            -H "x-api-key: $api_key" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "Content-Type: application/json" \
+            -d "$body" 2>&1)
+    fi
 
     http_code=$(echo "$response" | tail -n1)
     local body_response=$(echo "$response" | sed '$d')
@@ -242,17 +253,138 @@ write_env_to_file() {
     echo "export ${var_name}=\"${var_value}\"" >> "$file"
 }
 
-# 设置环境变量 / Set environment variables
+# 获取系统中相关的环境变量 / Get related env vars in current session and files
+get_claude_env_vars() {
+    local config_files=()
+    [[ -f "$HOME/.bashrc" ]] && config_files+=("$HOME/.bashrc")
+    [[ -f "$HOME/.zshrc" ]] && config_files+=("$HOME/.zshrc")
+    
+    local file_vars=""
+    for config_file in "${config_files[@]}"; do
+        if [[ -f "$config_file" ]]; then
+            local lines
+            lines=$(grep -oE '^export [A-Za-z0-9_]+' "$config_file" 2>/dev/null | cut -d' ' -f2 || true)
+            file_vars="${file_vars}${lines}"$'\n'
+        fi
+    done
+
+    local env_vars
+    env_vars=$(env | cut -d'=' -f1 || true)
+    
+    local combined
+    combined=$(echo -e "${file_vars}\n${env_vars}" | sort -u)
+    
+    for v in $combined; do
+        if [[ "$v" =~ ^(ANTHROPIC_|CLAUDE_|CLAUDE_CODE_|DISABLE_PROMPT_CACHING) ]]; then
+            echo "$v"
+        fi
+    done
+}
+
+# 显示系统中相关的环境变量 / Show related env vars in current session and files
+show_claude_env_vars() {
+    local vars
+    vars=$(get_claude_env_vars)
+    echo ""
+    echo -e "${CYAN}$(L '当前系统中 Claude Code 相关的环境变量:' 'Current Claude Code related environment variables:')${NC}"
+    echo -e "${GRAY}-------------------------------------------${NC}"
+    if [[ -z "$vars" ]]; then
+        echo -e "  $(L '(未检测到)' '  (None detected)')"
+    else
+        for v in $vars; do
+            # 从当前环境变量获取值，若为空则尝试从配置文件读取
+            local val="${!v}"
+            if [[ -z "$val" ]]; then
+                for config_file in "$HOME/.bashrc" "$HOME/.zshrc"; do
+                    if [[ -f "$config_file" ]]; then
+                        local extracted
+                        extracted=$(grep -h "^export $v=" "$config_file" 2>/dev/null | head -1 | cut -d'"' -f2 | cut -d"'" -f2 || true)
+                        if [[ -n "$extracted" ]]; then
+                            val="$extracted"
+                            break
+                        fi
+                    fi
+                done
+            fi
+            # 缩短显示超长变量值
+            local display="$val"
+            if [[ ${#val} -gt 50 ]]; then
+                display="${val:0:47}..."
+            fi
+            echo -e "  ${YELLOW}$v${NC} = $display"
+        done
+    fi
+    echo -e "${GRAY}-------------------------------------------${NC}"
+    local total_count=0
+    if [[ -n "$vars" ]]; then
+        total_count=$(echo "$vars" | wc -l | tr -d ' ')
+    fi
+    echo -e "${CYAN}$(L "共 $total_count 个相关变量" "Total: $total_count related variable(s)")${NC}"
+}
+
+# 清除系统中相关的环境变量 / Clear related env vars in current session and files
+clear_claude_env_vars() {
+    local vars
+    vars=$(get_claude_env_vars)
+    if [[ -z "$vars" ]]; then
+        echo -e "  ${GRAY}$(L '没有需要清除的变量' 'No variables to clear')${NC}"
+        return 0
+    fi
+    
+    local count=0
+    for v in $vars; do
+        # 从当前会话中清除
+        unset "$v"
+        # 从配置文件中删除
+        for config_file in "$HOME/.bashrc" "$HOME/.zshrc"; do
+            if [[ -f "$config_file" ]]; then
+                local temp_file
+                temp_file=$(mktemp)
+                grep -v "^export $v=" "$config_file" > "$temp_file" || true
+                cat "$temp_file" > "$config_file"
+                rm -f "$temp_file"
+            fi
+        done
+        echo -e "  ${GREEN}[OK]${NC} $v"
+        count=$((count + 1))
+    done
+    echo -e "${GREEN}$(L "已清除 $count 个变量" "Cleared $count variable(s)")${NC}"
+}
+
 set_api_config() {
     local provider_name="$1"
     local base_url="$2"
-    local model="$3"
-    local haiku_model="$4"
-    local api_key="$5"
-    local is_mimo="$6"
+    local opus_model="$3"
+    local sonnet_model="$4"
+    local haiku_model="$5"
+    local subagent_model="$6"
+    local api_key="$7"
+    local is_mimo="$8"
 
     echo ""
     echo -e "${CYAN}$(L "正在配置 $provider_name API..." "Configuring $provider_name API...")${NC}"
+
+    # 显示当前变量
+    show_claude_env_vars
+
+    # 选择安装模式
+    echo ""
+    echo -e "${YELLOW}$(L '请选择安装模式:' 'Please select install mode:')${NC}"
+    echo -e "${GREEN}  [1] $(L '清洁安装（默认）- 清除所有相关变量后重新配置' 'Clean Install (Default) - Clear all related vars then configure')${NC}"
+    echo -e "${GREEN}  [2] $(L '常规安装 - 仅覆盖写入以下变量' 'Normal Install - Only overwrite the following vars')${NC}"
+    read -p "$(L '请输入选项 (1/2，默认1): ' 'Enter option (1/2, default 1): ')" install_mode
+    if [[ -z "$install_mode" ]]; then
+        install_mode="1"
+    fi
+
+    if [[ "$install_mode" == "2" ]]; then
+        echo ""
+        echo -e "${CYAN}$(L '常规安装模式：仅覆盖写入变量' 'Normal mode: only overwriting variables')${NC}"
+    else
+        echo ""
+        echo -e "${CYAN}$(L '清洁安装模式：清除所有 Claude Code 相关变量' 'Clean mode: clearing all Claude Code related variables')${NC}"
+        clear_claude_env_vars
+    fi
 
     # 确定要写入的配置文件 / Determine config files to write
     local config_files=()
@@ -287,16 +419,15 @@ set_api_config() {
     # 写入环境变量 / Apply environment variables
     apply_var "ANTHROPIC_BASE_URL" "$base_url"
     apply_var "ANTHROPIC_AUTH_TOKEN" "$api_key"
-    apply_var "ANTHROPIC_MODEL" "$model"
-    apply_var "ANTHROPIC_DEFAULT_OPUS_MODEL" "$model"
-    apply_var "ANTHROPIC_DEFAULT_SONNET_MODEL" "$model"
+    apply_var "ANTHROPIC_MODEL" "$opus_model"
+    apply_var "ANTHROPIC_DEFAULT_OPUS_MODEL" "$opus_model"
+    apply_var "ANTHROPIC_DEFAULT_SONNET_MODEL" "$sonnet_model"
     apply_var "ANTHROPIC_DEFAULT_HAIKU_MODEL" "$haiku_model"
-    apply_var "CLAUDE_CODE_SUBAGENT_MODEL" "$haiku_model"
+    apply_var "CLAUDE_CODE_SUBAGENT_MODEL" "$subagent_model"
     apply_var "CLAUDE_CODE_EFFORT_LEVEL" "max"
 
     if [[ "$is_mimo" == "true" ]]; then
-        apply_var "CLAUDE_CONTEXT_CAPACITY_OVERRIDE" "1000000"
-        apply_var "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE" "100"
+        apply_var "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE" "80"
     fi
 
     return 0
@@ -313,7 +444,10 @@ handle_mimo_config() {
         echo -e "${GREEN}  [2] $(L '新加坡集群' 'Singapore Cluster')${NC}"
         echo -e "${GREEN}  [3] $(L '欧洲集群' 'Europe Cluster')${NC}"
 
-        read -p "$(L '请输入选项 (1, 2, 3) ' 'Enter option (1, 2, 3) ')" region_choice
+        read -p "$(L '请输入选项 (1, 2, 3，默认1) ' 'Enter option (1, 2, 3, default 1) ')" region_choice
+        if [[ -z "$region_choice" ]]; then
+            region_choice="1"
+        fi
         case "$region_choice" in
             2)
                 base_url="https://token-plan-sgp.xiaomimimo.com/anthropic"
@@ -342,14 +476,14 @@ handle_mimo_config() {
         return 1
     fi
 
-    if ! test_api_key "$base_url" "$api_key" "mimo-v2.5-pro"; then
+    if ! test_api_key "$base_url" "$api_key" "mimo-v2.5-pro" "$provider_name"; then
         read -p "$(L '验证失败。是否强制应用配置? (Y/N) ' 'Verification failed. Force apply configuration? (Y/N) ')" force
         if [[ ! "$force" =~ ^[Yy]$ ]]; then
             return 1
         fi
     fi
 
-    set_api_config "$provider_name" "$base_url" "mimo-v2.5-pro" "mimo-v2.5" "$api_key" "true"
+    set_api_config "$provider_name" "$base_url" "mimo-v2.5-pro[1m]" "mimo-v2.5-pro" "mimo-v2.5[1m]" "mimo-v2.5" "$api_key" "true"
     return $?
 }
 
@@ -367,14 +501,14 @@ handle_deepseek_config() {
         return 1
     fi
 
-    if ! test_api_key "$base_url" "$api_key" "deepseek-v4-pro[1m]"; then
+    if ! test_api_key "$base_url" "$api_key" "deepseek-v4-pro" "$provider_name"; then
         read -p "$(L '验证失败。是否强制应用配置? (Y/N) ' 'Verification failed. Force apply configuration? (Y/N) ')" force
         if [[ ! "$force" =~ ^[Yy]$ ]]; then
             return 1
         fi
     fi
 
-    set_api_config "$provider_name" "$base_url" "deepseek-v4-pro[1m]" "deepseek-v4-flash" "$api_key" "false"
+    set_api_config "$provider_name" "$base_url" "deepseek-v4-pro[1m]" "deepseek-v4-pro" "deepseek-v4-flash[1m]" "deepseek-v4-flash" "$api_key" "false"
     return $?
 }
 
@@ -410,7 +544,10 @@ show_result() {
 # 主程序 / Main program
 while true; do
     show_menu
-    read -p "$(L '请输入选项 (1, 2, 3, Q) ' 'Enter option (1, 2, 3, Q) ')" choice
+    read -p "$(L '请输入选项 (1, 2, 3, Q，默认1) ' 'Enter option (1, 2, 3, Q, default 1) ')" choice
+    if [[ -z "$choice" ]]; then
+        choice="1"
+    fi
 
     case "$choice" in
         1)
