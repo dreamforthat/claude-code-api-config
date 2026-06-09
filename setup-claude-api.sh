@@ -424,7 +424,6 @@ set_api_config() {
     apply_var "ANTHROPIC_DEFAULT_SONNET_MODEL" "$sonnet_model"
     apply_var "ANTHROPIC_DEFAULT_HAIKU_MODEL" "$haiku_model"
     apply_var "CLAUDE_CODE_SUBAGENT_MODEL" "$subagent_model"
-    apply_var "CLAUDE_CODE_EFFORT_LEVEL" "max"
 
     if [[ "$is_mimo" == "true" ]]; then
         apply_var "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE" "80"

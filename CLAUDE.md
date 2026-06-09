@@ -32,7 +32,6 @@ The script sets the following environment variables:
 - `ANTHROPIC_DEFAULT_SONNET_MODEL`
 - `ANTHROPIC_DEFAULT_HAIKU_MODEL`
 - `CLAUDE_CODE_SUBAGENT_MODEL`
-- `CLAUDE_CODE_EFFORT_LEVEL`
 
 ### Storage Locations
 - **Windows**: User environment variables via `setx`

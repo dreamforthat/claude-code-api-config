@@ -263,7 +263,6 @@ function Set-ApiConfig {
         'ANTHROPIC_DEFAULT_SONNET_MODEL' = $SonnetModel
         'ANTHROPIC_DEFAULT_HAIKU_MODEL' = $HaikuModel
         'CLAUDE_CODE_SUBAGENT_MODEL' = $SubagentModel
-        'CLAUDE_CODE_EFFORT_LEVEL' = 'max'
     }
     
     if ($ProviderName -match 'MIMO') {
