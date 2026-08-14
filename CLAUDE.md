@@ -1,13 +1,13 @@
 用中文回答
 # Claude Code API Configuration Tool
 
-This project provides a simple way to configure Claude Code to use third-party API providers like MIMO and DeepSeek on Windows, Linux, and macOS.
+This project provides a simple way to configure Claude Code to use third-party API providers (DeepSeek, MIMO, and Custom Anthropic-compatible APIs) on Windows, Linux, and macOS.
 
 ## Core Files
-- `setup-claude-api.ps1`: The main PowerShell script for Windows interactive configuration.
+- `setup-claude-api.ps1`: The main PowerShell script for Windows interactive configuration (UTF-8 with BOM).
 - `setup-claude-api.bat`: A batch wrapper for easy execution by double-clicking on Windows.
 - `setup-claude-api.sh`: The main Bash script for Linux/macOS interactive configuration.
-- `README.md`: Human-readable documentation.
+- `README.md`: Human-readable bilingual documentation.
 
 ## Development Commands
 
@@ -32,6 +32,7 @@ The script sets the following environment variables:
 - `ANTHROPIC_DEFAULT_SONNET_MODEL`
 - `ANTHROPIC_DEFAULT_HAIKU_MODEL`
 - `CLAUDE_CODE_SUBAGENT_MODEL`
+- `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` (set to `80` for MIMO)
 
 ### Storage Locations
 - **Windows**: User environment variables via `setx`

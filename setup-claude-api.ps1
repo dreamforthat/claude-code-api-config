@@ -23,7 +23,7 @@ if ($Help) {
     Write-Host ''
     Write-Host (L '功能:' 'Features:')
     Write-Host (L '  - 检测 Claude Code 是否已安装' '  - Detect if Claude Code is installed')
-    Write-Host (L '  - 交互式选择 API 提供商 (MIMO 套餐/按量计费，或 DeepSeek)' '  - Interactive API provider selection (MIMO Plan/Pay-as-you-go, or DeepSeek)')
+    Write-Host (L '  - 交互式选择 API 提供商 (DeepSeek, MIMO, 或自定义 API)' '  - Interactive API provider selection (DeepSeek, MIMO, or Custom API)')
     Write-Host (L '  - 发送测试请求验证 API 密钥' '  - Send test request to verify API key')
     Write-Host (L '  - 安全输入 API 密钥' '  - Secure API key input')
     Write-Host (L '  - 自动设置环境变量' '  - Automatically set environment variables')
@@ -113,9 +113,9 @@ function Show-Menu {
     Write-Host ''
     Write-Host (L '请选择 API 提供商:' 'Please select API provider:') -ForegroundColor Yellow
     Write-Host ''
-    Write-Host (L '  [1] MIMO API (套餐计费 - Plan)' '  [1] MIMO API (Plan)') -ForegroundColor Green
-    Write-Host (L '  [2] MIMO API (按量计费 - Pay-as-you-go)' '  [2] MIMO API (Pay-as-you-go)') -ForegroundColor Green
-    Write-Host (L '  [3] DeepSeek API' '  [3] DeepSeek API') -ForegroundColor Green
+    Write-Host (L '  [1] DeepSeek API' '  [1] DeepSeek API') -ForegroundColor Green
+    Write-Host (L '  [2] MIMO API' '  [2] MIMO API') -ForegroundColor Green
+    Write-Host (L '  [3] 自定义 API' '  [3] Custom API') -ForegroundColor Green
     Write-Host (L '  [Q] 退出' '  [Q] Exit') -ForegroundColor Red
     Write-Host ''
 }
@@ -345,6 +345,85 @@ function Handle-DeepSeekConfig {
     return Set-ApiConfig -ProviderName $providerName -BaseUrl $baseUrl -OpusModel 'deepseek-v4-pro[1m]' -SonnetModel 'deepseek-v4-pro' -HaikuModel 'deepseek-v4-flash[1m]' -SubagentModel 'deepseek-v4-flash' -ApiKey $apiKey
 }
 
+function Handle-MimoMenu {
+    Write-Host ''
+    Write-Host (L '请选择 MIMO API 计费方式:' 'Please select MIMO API billing method:') -ForegroundColor Yellow
+    Write-Host (L '  [1] MIMO API (套餐计费 - Plan)' '  [1] MIMO API (Plan)') -ForegroundColor Green
+    Write-Host (L '  [2] MIMO API (按量计费 - Pay-as-you-go)' '  [2] MIMO API (Pay-as-you-go)') -ForegroundColor Green
+    Write-Host (L '  [Q] 返回主菜单' '  [Q] Return to main menu') -ForegroundColor Red
+    Write-Host ''
+
+    $mimoChoice = Read-Host (L '请输入选项 (1, 2, Q，默认1)' 'Enter option (1, 2, Q, default 1)')
+    if ([string]::IsNullOrWhiteSpace($mimoChoice)) { $mimoChoice = '1' }
+
+    switch ($mimoChoice) {
+        '1' {
+            $success = Handle-MimoConfig -Type 'Plan'
+            Show-Result -Success $success -ProviderName (L "MIMO 套餐计费 API" "MIMO Plan API")
+            return $true
+        }
+        '2' {
+            $success = Handle-MimoConfig -Type 'Pay'
+            Show-Result -Success $success -ProviderName (L "MIMO 按量计费 API" "MIMO Pay-as-you-go API")
+            return $true
+        }
+        { $_ -match '^[Qq]$' } {
+            return $false
+        }
+        default {
+            Write-Host ''
+            Write-Host (L '无效选项，操作已取消' 'Invalid option, operation cancelled') -ForegroundColor Red
+            return $false
+        }
+    }
+}
+
+function Handle-CustomConfig {
+    $providerName = (L '自定义' 'Custom')
+    
+    Write-Host ''
+    Write-Host (L '配置自定义 API:' 'Configure Custom API:') -ForegroundColor Yellow
+    
+    # 1. Base URL
+    Write-Host ''
+    Write-Host (L '请输入 API 端点地址 (Base URL，例如: https://api.example.com/anthropic):' 'Please enter API Base URL (e.g. https://api.example.com/anthropic):') -ForegroundColor Yellow
+    $baseUrl = Read-Host (L 'Base URL' 'Base URL')
+    if ([string]::IsNullOrWhiteSpace($baseUrl)) {
+        Write-Host ''
+        Write-Host (L '错误: API 端点地址不能为空' 'Error: API Base URL cannot be empty') -ForegroundColor Red
+        return $false
+    }
+    $baseUrl = $baseUrl.TrimEnd('/')
+
+    # 2. API Key
+    $apiKey = Get-SecureApiKey -ProviderName $providerName
+    if ([string]::IsNullOrWhiteSpace($apiKey)) {
+        Write-Host ''
+        Write-Host (L '错误: API 密钥不能为空' 'Error: API Key cannot be empty') -ForegroundColor Red
+        return $false
+    }
+
+    # 3. Model Name
+    Write-Host ''
+    Write-Host (L '请输入模型名称 (Model Name，例如: claude-3-5-sonnet-20241022):' 'Please enter Model Name (e.g. claude-3-5-sonnet-20241022):') -ForegroundColor Yellow
+    $model = Read-Host (L 'Model Name' 'Model Name')
+    if ([string]::IsNullOrWhiteSpace($model)) {
+        Write-Host ''
+        Write-Host (L '错误: 模型名称不能为空' 'Error: Model Name cannot be empty') -ForegroundColor Red
+        return $false
+    }
+
+    $isValid = Test-ApiKey -BaseUrl $baseUrl -ApiKey $apiKey -Model $model -ProviderName $providerName
+    if (-not $isValid) {
+        $force = Read-Host (L '验证失败。是否强制应用配置? (Y/N)' 'Verification failed. Force apply configuration? (Y/N)')
+        if ($force -notmatch '^[Yy]$') {
+            return $false
+        }
+    }
+
+    return Set-ApiConfig -ProviderName $providerName -BaseUrl $baseUrl -OpusModel $model -SonnetModel $model -HaikuModel $model -SubagentModel $model -ApiKey $apiKey
+}
+
 function Show-Result {
     param([bool]$Success, [string]$ProviderName)
 
@@ -376,18 +455,17 @@ do {
 
     switch ($choice) {
         '1' {
-            $success = Handle-MimoConfig -Type 'Plan'
-            Show-Result -Success $success -ProviderName (L "MIMO 套餐计费 API" "MIMO Plan API")
+            $success = Handle-DeepSeekConfig
+            Show-Result -Success $success -ProviderName "DeepSeek API"
             break
         }
         '2' {
-            $success = Handle-MimoConfig -Type 'Pay'
-            Show-Result -Success $success -ProviderName (L "MIMO 按量计费 API" "MIMO Pay-as-you-go API")
+            Handle-MimoMenu | Out-Null
             break
         }
         '3' {
-            $success = Handle-DeepSeekConfig
-            Show-Result -Success $success -ProviderName "DeepSeek API"
+            $success = Handle-CustomConfig
+            Show-Result -Success $success -ProviderName (L "自定义 API" "Custom API")
             break
         }
         { $_ -match '^[Qq]$' } {

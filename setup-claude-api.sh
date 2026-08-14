@@ -34,7 +34,7 @@ show_help() {
     echo ""
     echo "$(L '功能:' 'Features:')"
     echo "$(L '  - 检测 Claude Code 是否已安装' '  - Detect if Claude Code is installed')"
-    echo "$(L '  - 交互式选择 API 提供商 (MIMO 套餐/按量计费，或 DeepSeek)' '  - Interactive API provider selection (MIMO Plan/Pay-as-you-go, or DeepSeek)')"
+    echo "$(L '  - 交互式选择 API 提供商 (DeepSeek, MIMO, 或自定义 API)' '  - Interactive API provider selection (DeepSeek, MIMO, or Custom API)')"
     echo "$(L '  - 发送测试请求验证 API 密钥' '  - Send test request to verify API key')"
     echo "$(L '  - 安全输入 API 密钥' '  - Secure API key input')"
     echo "$(L '  - 自动设置环境变量' '  - Automatically set environment variables')"
@@ -149,9 +149,9 @@ show_menu() {
     echo ""
     echo -e "${YELLOW}$(L '请选择 API 提供商:' 'Please select API provider:')${NC}"
     echo ""
-    echo -e "${GREEN}  [1] MIMO API ($(L '套餐计费' 'Plan'))${NC}"
-    echo -e "${GREEN}  [2] MIMO API ($(L '按量计费' 'Pay-as-you-go'))${NC}"
-    echo -e "${GREEN}  [3] DeepSeek API${NC}"
+    echo -e "${GREEN}  [1] DeepSeek API${NC}"
+    echo -e "${GREEN}  [2] MIMO API${NC}"
+    echo -e "${GREEN}  [3] $(L '自定义 API' 'Custom API')${NC}"
     echo -e "${RED}  [Q] $(L '退出' 'Exit')${NC}"
     echo ""
 }
@@ -511,6 +511,91 @@ handle_deepseek_config() {
     return $?
 }
 
+# 处理 MIMO 二级菜单 / Handle MIMO sub-menu
+handle_mimo_menu() {
+    echo ""
+    echo -e "${YELLOW}$(L '请选择 MIMO API 计费方式:' 'Please select MIMO API billing method:')${NC}"
+    echo -e "${GREEN}  [1] MIMO API ($(L '套餐计费' 'Plan'))${NC}"
+    echo -e "${GREEN}  [2] MIMO API ($(L '按量计费' 'Pay-as-you-go'))${NC}"
+    echo -e "${RED}  [Q] $(L '返回主菜单' 'Return to main menu')${NC}"
+    echo ""
+
+    read -p "$(L '请输入选项 (1, 2, Q，默认1) ' 'Enter option (1, 2, Q, default 1) ')" mimo_choice
+    if [[ -z "$mimo_choice" ]]; then
+        mimo_choice="1"
+    fi
+
+    case "$mimo_choice" in
+        1)
+            handle_mimo_config "Plan"
+            show_result "$?" "$(L 'MIMO 套餐计费 API' 'MIMO Plan API')"
+            return 0
+            ;;
+        2)
+            handle_mimo_config "Pay"
+            show_result "$?" "$(L 'MIMO 按量计费 API' 'MIMO Pay-as-you-go API')"
+            return 0
+            ;;
+        [Qq])
+            return 1
+            ;;
+        *)
+            echo ""
+            echo -e "${RED}$(L '无效选项，操作已取消' 'Invalid option, operation cancelled')${NC}"
+            return 1
+            ;;
+    esac
+}
+
+# 处理自定义配置 / Handle Custom config
+handle_custom_config() {
+    local provider_name="$(L '自定义' 'Custom')"
+
+    echo ""
+    echo -e "${YELLOW}$(L '配置自定义 API:' 'Configure Custom API:')${NC}"
+
+    # 1. Base URL
+    echo ""
+    echo -e "${YELLOW}$(L '请输入 API 端点地址 (Base URL，例如: https://api.example.com/anthropic):' 'Please enter API Base URL (e.g. https://api.example.com/anthropic):')${NC}"
+    read -p "Base URL: " base_url
+    if [[ -z "$base_url" ]]; then
+        echo ""
+        echo -e "${RED}$(L '错误: API 端点地址不能为空' 'Error: API Base URL cannot be empty')${NC}"
+        return 1
+    fi
+    base_url="${base_url%/}"
+
+    # 2. API Key
+    local api_key
+    get_secure_api_key "$provider_name" api_key
+
+    if [[ -z "$api_key" ]]; then
+        echo ""
+        echo -e "${RED}$(L '错误: API 密钥不能为空' 'Error: API Key cannot be empty')${NC}"
+        return 1
+    fi
+
+    # 3. Model Name
+    echo ""
+    echo -e "${YELLOW}$(L '请输入模型名称 (Model Name，例如: claude-3-5-sonnet-20241022):' 'Please enter Model Name (e.g. claude-3-5-sonnet-20241022):')${NC}"
+    read -p "Model Name: " model
+    if [[ -z "$model" ]]; then
+        echo ""
+        echo -e "${RED}$(L '错误: 模型名称不能为空' 'Error: Model Name cannot be empty')${NC}"
+        return 1
+    fi
+
+    if ! test_api_key "$base_url" "$api_key" "$model" "$provider_name"; then
+        read -p "$(L '验证失败。是否强制应用配置? (Y/N) ' 'Verification failed. Force apply configuration? (Y/N) ')" force
+        if [[ ! "$force" =~ ^[Yy]$ ]]; then
+            return 1
+        fi
+    fi
+
+    set_api_config "$provider_name" "$base_url" "$model" "$model" "$model" "$model" "$api_key" "false"
+    return $?
+}
+
 # 显示结果 / Show result
 show_result() {
     local success="$1"
@@ -550,16 +635,15 @@ while true; do
 
     case "$choice" in
         1)
-            handle_mimo_config "Plan"
-            show_result "$?" "$(L 'MIMO 套餐计费 API' 'MIMO Plan API')"
-            ;;
-        2)
-            handle_mimo_config "Pay"
-            show_result "$?" "$(L 'MIMO 按量计费 API' 'MIMO Pay-as-you-go API')"
-            ;;
-        3)
             handle_deepseek_config
             show_result "$?" "DeepSeek API"
+            ;;
+        2)
+            handle_mimo_menu
+            ;;
+        3)
+            handle_custom_config
+            show_result "$?" "$(L '自定义 API' 'Custom API')"
             ;;
         [Qq])
             echo ""

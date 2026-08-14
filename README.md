@@ -21,7 +21,7 @@
 - **跨平台支持** - 支持 Windows (PowerShell) 和 Linux/macOS (Bash)
 - **交互式菜单** - 简单直观的选项界面
 - **中英双语** - 脚本内置简体中文和 English，无第三方依赖
-- **多 API 支持** - 支持 MIMO（套餐/按量）和 DeepSeek
+- **多 API 支持** - 支持 DeepSeek、MIMO（套餐/按量）和自定义 API
 - **密钥安全输入** - 输入时隐藏字符，保护 API 密钥
 - **自动验证** - 配置前自动验证 API 密钥有效性
 - **环境检测** - 自动检测 Claude Code 是否已安装
@@ -30,35 +30,37 @@
 
 ## 支持的 API 提供商
 
-### 1. MIMO API（套餐计费）
-
-| 项目 | 值 |
-|------|-----|
-| 官网 | [MIMO API](https://platform.xiaomimimo.com/console/plan-manage) |
-| 端点 | 中国：`https://token-plan-cn.xiaomimimo.com/anthropic`<br>新加坡：`https://token-plan-sgp.xiaomimimo.com/anthropic`<br>欧洲：`https://token-plan-ams.xiaomimimo.com/anthropic` |
-| 主模型 | `mimo-v2.5-pro` |
-| 轻量模型 | `mimo-v2.5` |
-| 特点 | 固定套餐，适合高频使用 |
-
-### 2. MIMO API（按量计费）
-
-| 项目 | 值 |
-|------|-----|
-| 官网 | [MIMO API](https://platform.xiaomimimo.com/console/api-keys) |
-| 端点 | `https://api.xiaomimimo.com/anthropic` |
-| 主模型 | `mimo-v2.5-pro` |
-| 轻量模型 | `mimo-v2.5` |
-| 特点 | 按使用量计费，灵活可控 |
-
-### 3. DeepSeek API
+### 1. DeepSeek API
 
 | 项目 | 值 |
 |------|-----|
 | 官网 | [ DeepSeek API ](https://platform.deepseek.com/usage) |
 | 端点 | `https://api.deepseek.com/anthropic` |
 | 主模型 | `deepseek-v4-pro[1m]` |
-| 轻量模型 | `deepseek-v4-flash` |
+| 轻量模型 | `deepseek-v4-flash[1m]` |
 | 特点 | 国产大模型，性价比高 |
+
+### 2. MIMO API
+
+包含两个二级子选项：
+- **套餐计费 (Plan)**：支持中国（`https://token-plan-cn.xiaomimimo.com/anthropic`）、新加坡、欧洲集群。
+- **按量计费 (Pay-as-you-go)**：端点为 `https://api.xiaomimimo.com/anthropic`。
+
+| 项目 | 值 |
+|------|-----|
+| 官网 | [MIMO API](https://platform.xiaomimimo.com) |
+| 主模型 | `mimo-v2.5-pro[1m]` |
+| 轻量模型 | `mimo-v2.5[1m]` |
+| 特点 | 支持套餐与按量双模式 |
+
+### 3. 自定义 API (Custom API)
+
+| 项目 | 值 |
+|------|-----|
+| 端点 | 由用户自定义输入（如 `https://api.example.com/anthropic`） |
+| 密钥 | 由用户自定义输入（隐藏输入） |
+| 模型 | 由用户自定义输入（如 `claude-3-5-sonnet-20241022`） |
+| 特点 | 支持任意兼容 Anthropic 协议的第三方代理端点 |
 
 ## 系统要求
 
@@ -171,9 +173,9 @@ bash setup-claude-api.sh
    ↓
 3. 检测 Claude Code 安装状态
    ↓
-4. 选择 API 提供商（1/2/3，默认1）
+4. 选择 API 提供商（1: DeepSeek / 2: MIMO 二级菜单 / 3: 自定义 API，默认1）
    ↓
-5. 输入 API 密钥（不显示字符）
+5. 输入 API 密钥及相关参数（自定义 API 还需输入 Base URL 与模型名称）
    ↓
 6. 自动验证密钥有效性
    ↓
@@ -380,15 +382,29 @@ cd claude-code-api-config
 
 ## 更新日志
 
+### v1.2.0 (2026-08-14)
+
+- 重构主菜单层级：`[1] DeepSeek API`、`[2] MIMO API`、`[3] 自定义 API`
+- 新增 MIMO 二级子菜单：支持在二级菜单中切换选择套餐计费 (Plan) 与按量计费 (Pay-as-you-go)
+- 新增自定义 API 功能：支持自定义输入 Base URL、API Key 与模型名称，自动完成映射配置
+- 完善 Windows 脚本 UTF-8 BOM 编码支持，彻底解决中文 Windows 终端解析与运行报错
+
+### v1.1.0 (2026-05-08)
+
+- 新增 Linux / macOS 跨平台支持（Bash 脚本 `setup-claude-api.sh`）
+- 新增环境变量扫描：配置前自动检测系统中所有 Claude Code 相关环境变量
+- 新增清洁安装模式：清除所有相关旧变量后重新配置（默认）
+- 新增常规安装模式：仅覆盖写入脚本涉及的变量
+- 所有选择菜单支持直接按回车选择默认选项（选项1）
+
 ### v1.0.0 (2025-05-22)
 
 - 初始发布
-- 支持 MIMO API（套餐计费）
-- 支持 MIMO API（按量计费）
+- 支持 MIMO API（套餐计费 / 按量计费）
 - 支持 DeepSeek API
-- 自动验证 API 密钥
-- 检测 Claude Code 安装状态
-- 支持中英双语输出
+- 自动验证 API 密钥有效性
+- 自动检测 Claude Code 安装状态
+- 内置中英双语支持
 
 ## 相关链接
 
@@ -429,7 +445,7 @@ This tool helps Windows and Linux/macOS users quickly configure Claude Code to u
 - **Cross-Platform** - Supports Windows (PowerShell) and Linux/macOS (Bash)
 - **Interactive Menu** - Simple and intuitive interface
 - **Bilingual** - Built-in Chinese and English output
-- **Multi-API Support** - Supports MIMO (Plan/Pay-as-you-go) and DeepSeek
+- **Multi-API Support** - Supports DeepSeek, MIMO (Plan/Pay-as-you-go), and Custom API
 - **Secure Key Input** - Characters are hidden during input to protect API keys
 - **Auto Validation** - Automatically verifies API key validity before applying config
 - **Environment Detection** - Detects if Claude Code is installed
@@ -438,35 +454,37 @@ This tool helps Windows and Linux/macOS users quickly configure Claude Code to u
 
 ## Supported API Providers
 
-### 1. MIMO API (Plan)
+### 1. DeepSeek API
 
 | Item | Value |
 |------|-----|
-| Website | [MIMO API](https://platform.xiaomimimo.com/console/plan-manage) |
-| Endpoint | China: `https://token-plan-cn.xiaomimimo.com/anthropic`<br>Singapore: `https://token-plan-sgp.xiaomimimo.com/anthropic`<br>Europe: `https://token-plan-ams.xiaomimimo.com/anthropic` |
-| Main Model | `mimo-v2.5-pro` |
-| Light Model | `mimo-v2.5` |
-| Features | Fixed plan, suitable for high-frequency usage |
-
-### 2. MIMO API (Pay-as-you-go)
-
-| Item | Value |
-|------|-----|
-| Website | [MIMO API](https://platform.xiaomimimo.com/console/api-keys) |
-| Endpoint | `https://api.xiaomimimo.com/anthropic` |
-| Main Model | `mimo-v2.5-pro` |
-| Light Model | `mimo-v2.5` |
-| Features | Pay-as-you-go, flexible and controllable |
-
-### 3. DeepSeek API
-
-| Item | Value |
-|------|-----|
-| Website | [ DeepSeek API ](https://platform.deepseek.com/usage) |
+| Website | [DeepSeek API](https://platform.deepseek.com/usage) |
 | Endpoint | `https://api.deepseek.com/anthropic` |
 | Main Model | `deepseek-v4-pro[1m]` |
-| Light Model | `deepseek-v4-flash` |
-| Features | Chinese LLM, highly cost-effective |
+| Light Model | `deepseek-v4-flash[1m]` |
+| Features | Cost-effective Chinese LLM |
+
+### 2. MIMO API
+
+Contains two sub-options:
+- **Plan**: Supports China (`https://token-plan-cn.xiaomimimo.com/anthropic`), Singapore, and Europe clusters.
+- **Pay-as-you-go**: Endpoint `https://api.xiaomimimo.com/anthropic`.
+
+| Item | Value |
+|------|-----|
+| Website | [MIMO API](https://platform.xiaomimimo.com) |
+| Main Model | `mimo-v2.5-pro[1m]` |
+| Light Model | `mimo-v2.5[1m]` |
+| Features | Supports both subscription plan and pay-as-you-go modes |
+
+### 3. Custom API
+
+| Item | Value |
+|------|-----|
+| Endpoint | User-defined (e.g. `https://api.example.com/anthropic`) |
+| API Key | User-defined (secure hidden input) |
+| Model | User-defined (e.g. `claude-3-5-sonnet-20241022`) |
+| Features | Supports any third-party Anthropic-compatible API endpoint |
 
 ## System Requirements
 
@@ -579,9 +597,9 @@ bash setup-claude-api.sh
    ↓
 3. Detect Claude Code installation
    ↓
-4. Select API provider (1/2/3, default: 1)
+4. Select API provider (1: DeepSeek / 2: MIMO sub-menu / 3: Custom API, default: 1)
    ↓
-5. Input API Key (Hidden characters)
+5. Input API Key and parameters (Custom API will also prompt for Base URL & Model Name)
    ↓
 6. Auto validate key
    ↓
@@ -781,7 +799,23 @@ Issues and Pull Requests are welcome!
 
 ## Changelog
 
+### v1.2.0 (2026-08-14)
+
+- Restructured main menu: `[1] DeepSeek API`, `[2] MIMO API`, `[3] Custom API`
+- Added MIMO sub-menu: easily switch between Plan and Pay-as-you-go modes
+- Added Custom API support: allows custom Base URL, API Key, and Model Name with automatic mapping
+- Fixed UTF-8 BOM encoding for Windows script to resolve Chinese terminal parsing errors
+
+### v1.1.0 (2026-05-08)
+
+- Added Linux / macOS cross-platform support via Bash script (`setup-claude-api.sh`)
+- Added environment variable scanner: detects existing Claude Code env vars before setup
+- Added Clean Install mode: clears existing Claude Code vars before writing new ones (default)
+- Added Normal Install mode: only overwrites managed variables
+- All interactive menus support pressing Enter to select default option (Option 1)
+
 ### v1.0.0 (2025-05-22)
+
 - Initial Release
 - Support MIMO API (Plan & Pay-as-you-go)
 - Support DeepSeek API
