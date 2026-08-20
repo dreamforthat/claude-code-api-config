@@ -210,17 +210,41 @@ function Show-ClaudeEnvVars {
     Write-Host (L "共 $($vars.Count) 个相关变量" "Total: $($vars.Count) related variable(s)") -ForegroundColor Cyan
 }
 
+function Broadcast-EnvironmentChange {
+    if (-not ('Win32.NativeEnv' -as [type])) {
+        Add-Type -Namespace Win32 -Name NativeEnv -MemberDefinition @"
+            [System.Runtime.InteropServices.DllImport("user32.dll", SetLastError=true, CharSet=System.Runtime.InteropServices.CharSet.Auto)]
+            public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, UIntPtr wParam, string lParam, uint fuFlags, uint uTimeout, out UIntPtr result);
+"@ -ErrorAction SilentlyContinue
+    }
+    try {
+        $result = [UIntPtr]::Zero
+        [Win32.NativeEnv]::SendMessageTimeout([IntPtr]0xffff, 0x1a, [UIntPtr]::Zero, "Environment", 2, 2000, [ref]$result) | Out-Null
+    } catch {}
+}
+
 function Clear-ClaudeEnvVars {
-    $vars = Get-ClaudeEnvVars
+    param([string[]]$SkipNames = @())
+    $vars = Get-ClaudeEnvVars | Where-Object { $SkipNames -notcontains $_.Name }
     if ($vars.Count -eq 0) {
-        Write-Host (L '没有需要清除的变量' 'No variables to clear') -ForegroundColor DarkGray
+        if ($SkipNames.Count -eq 0) {
+            Write-Host (L '没有需要清除的变量' 'No variables to clear') -ForegroundColor DarkGray
+        }
         return
     }
-    foreach ($v in $vars) {
-        [Environment]::SetEnvironmentVariable($v.Name, $null, "User")
-        Write-Host "  [OK] $($v.Name)" -ForegroundColor Green
+    try {
+        $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true)
+        if ($key) {
+            foreach ($v in $vars) {
+                $key.DeleteValue($v.Name, $false)
+                Write-Host "  [OK] $(L '已清除' 'Cleared') $($v.Name)" -ForegroundColor Green
+            }
+            $key.Close()
+        }
+        Write-Host (L "已清除 $($vars.Count) 个旧变量" "Cleared $($vars.Count) old variable(s)") -ForegroundColor Green
+    } catch {
+        Write-Host (L "清除变量时出错: $($_.Exception.Message)" "Error clearing variables: $($_.Exception.Message)") -ForegroundColor Red
     }
-    Write-Host (L "已清除 $($vars.Count) 个变量" "Cleared $($vars.Count) variable(s)") -ForegroundColor Green
 }
 
 function Set-ApiConfig {
@@ -246,16 +270,7 @@ function Set-ApiConfig {
     $installMode = Read-Host (L '请输入选项 (1/2，默认1)' 'Enter option (1/2, default 1)')
     if ([string]::IsNullOrWhiteSpace($installMode)) { $installMode = '1' }
 
-    if ($installMode -eq '2') {
-        Write-Host ''
-        Write-Host (L '常规安装模式：仅覆盖写入以下变量' 'Normal mode: only overwriting these variables') -ForegroundColor Cyan
-    } else {
-        Write-Host ''
-        Write-Host (L '清洁安装模式：清除所有 Claude Code 相关变量' 'Clean mode: clearing all Claude Code related variables') -ForegroundColor Cyan
-        Clear-ClaudeEnvVars
-    }
-
-    $envVars = @{
+    $envVars = [ordered]@{
         'ANTHROPIC_BASE_URL' = $BaseUrl
         'ANTHROPIC_AUTH_TOKEN' = $ApiKey
         'ANTHROPIC_MODEL' = $OpusModel
@@ -269,14 +284,32 @@ function Set-ApiConfig {
         $envVars['CLAUDE_AUTOCOMPACT_PCT_OVERRIDE'] = '80'
     }
 
-    foreach ($var in $envVars.GetEnumerator()) {
-        $result = setx $var.Key $var.Value 2>&1
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "  [OK] $($var.Key)" -ForegroundColor Green
-        } else {
-            Write-Host "  [FAIL] $($var.Key)" -ForegroundColor Red
-        }
+    if ($installMode -eq '2') {
+        Write-Host ''
+        Write-Host (L '常规安装模式：仅覆盖写入以下变量' 'Normal mode: only overwriting these variables') -ForegroundColor Cyan
+    } else {
+        Write-Host ''
+        Write-Host (L '清洁安装模式：清除所有 Claude Code 相关变量' 'Clean mode: clearing all Claude Code related variables') -ForegroundColor Cyan
+        Clear-ClaudeEnvVars -SkipNames ($envVars.Keys | ForEach-Object { $_ })
     }
+
+    try {
+        $regKey = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey('Environment', $true)
+        if (-not $regKey) {
+            $regKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey('Environment')
+        }
+        foreach ($key in $envVars.Keys) {
+            $regKey.SetValue($key, $envVars[$key], [Microsoft.Win32.RegistryValueKind]::String)
+            Write-Host "  [OK] $key" -ForegroundColor Green
+        }
+        $regKey.Close()
+    } catch {
+        Write-Host "  [FAIL] $($_.Exception.Message)" -ForegroundColor Red
+        return $false
+    }
+
+    # 一次性广播通知系统环境变量已变更
+    Broadcast-EnvironmentChange
 
     return $true
 }
